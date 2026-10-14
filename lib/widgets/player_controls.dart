@@ -125,7 +125,7 @@ class _PlayButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: scheme.primary,
           shape: BoxShape.circle,
-          boxShadow: AppShadows.button(),
+          boxShadow: AppShadows.button(Theme.of(context).brightness),
         ),
         child: isLoading
             ? Padding(

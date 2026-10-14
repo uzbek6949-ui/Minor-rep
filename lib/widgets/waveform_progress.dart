@@ -114,9 +114,10 @@ class _WaveformProgressState extends State<WaveformProgress> {
                     bars: _barsFor(widget.seed),
                     progress: _fraction,
                     playedColor: scheme.primary,
-                    remainingColor: Theme.of(context).brightness == Brightness.light
+                    remainingColor:
+                        Theme.of(context).brightness == Brightness.light
                         ? AppColors.waveTrack
-                        : AppColors.darkLine,
+                        : AppColors.darkWaveTrack,
                   ),
                 ),
               ),

@@ -62,7 +62,9 @@ class PlayerScreen extends StatelessWidget {
                           song: song,
                           size: artSize.toDouble(),
                           radius: AppRadii.artwork,
-                          shadow: AppShadows.artwork(),
+                          shadow: AppShadows.artwork(
+                            Theme.of(context).brightness,
+                          ),
                         ),
                         const SizedBox(height: 34),
                         _TitleRow(

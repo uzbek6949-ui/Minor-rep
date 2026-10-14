@@ -13,12 +13,15 @@ class AppColors {
   static const Color line = Color(0xFFE4E7EC);
   static const Color waveTrack = Color(0xFFCCD0D8);
 
-  // Qora rejim (vaqtincha — yakuniy dizayn tanlanmagan)
+  // Qora rejim — dizayndagi "1c: qatlamli" variantidan olingan ranglar
   static const Color darkBackground = Color(0xFF0E1013);
-  static const Color darkSurface = Color(0xFF191C21);
+  static const Color darkSurface = Color(0xFF1A1C20); // qatorlar, varaqlar
+  static const Color darkSurfaceHigh = Color(0xFF24262A); // joriy qator
+  static const Color darkMiniPlayer = Color(0xFF2B2D30); // eng yuqori qatlam
   static const Color darkInk = Color(0xFFF4F6F8);
   static const Color darkInkSoft = Color(0xFF9DA3AD);
   static const Color darkLine = Color(0xFF262A31);
+  static const Color darkWaveTrack = Color(0xFF4A505A);
 }
 
 /// Yumshoq soyalar — dizaynning asosiy belgisi.
@@ -34,31 +37,60 @@ class AppShadows {
     ),
   ];
 
-  /// Katta albom rasmi uchun chuqurroq soya.
-  static List<BoxShadow> artwork() => <BoxShadow>[
-    BoxShadow(
-      color: Colors.black.withValues(alpha: 0.13),
-      blurRadius: 56,
-      spreadRadius: -14,
-      offset: const Offset(0, 26),
-    ),
-    BoxShadow(
-      color: Colors.black.withValues(alpha: 0.05),
-      blurRadius: 18,
-      spreadRadius: -6,
-      offset: const Offset(0, 8),
-    ),
-  ];
+  /// Katta albom rasmi uchun: yorug' rejimda soya, qora rejimda — rasm
+  /// orqasidan taraladigan yumshoq yorug'lik (dizayndagi "qatlamli" uslub).
+  static List<BoxShadow> artwork([Brightness brightness = Brightness.light]) {
+    if (brightness == Brightness.dark) {
+      return <BoxShadow>[
+        BoxShadow(
+          color: Colors.white.withValues(alpha: 0.10),
+          blurRadius: 84,
+          spreadRadius: -14,
+        ),
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.40),
+          blurRadius: 52,
+          spreadRadius: -20,
+          offset: const Offset(0, 24),
+        ),
+      ];
+    }
+    return <BoxShadow>[
+      BoxShadow(
+        color: Colors.black.withValues(alpha: 0.13),
+        blurRadius: 56,
+        spreadRadius: -14,
+        offset: const Offset(0, 26),
+      ),
+      BoxShadow(
+        color: Colors.black.withValues(alpha: 0.05),
+        blurRadius: 18,
+        spreadRadius: -6,
+        offset: const Offset(0, 8),
+      ),
+    ];
+  }
 
-  /// Qora doira tugma (play) uchun.
-  static List<BoxShadow> button() => <BoxShadow>[
-    BoxShadow(
-      color: Colors.black.withValues(alpha: 0.20),
-      blurRadius: 30,
-      spreadRadius: -8,
-      offset: const Offset(0, 14),
-    ),
-  ];
+  /// Katta play tugmasi: yorug'da soya, qorada oq halqa yorug'ligi.
+  static List<BoxShadow> button([Brightness brightness = Brightness.light]) {
+    if (brightness == Brightness.dark) {
+      return <BoxShadow>[
+        BoxShadow(
+          color: Colors.white.withValues(alpha: 0.14),
+          blurRadius: 34,
+          spreadRadius: -6,
+        ),
+      ];
+    }
+    return <BoxShadow>[
+      BoxShadow(
+        color: Colors.black.withValues(alpha: 0.20),
+        blurRadius: 30,
+        spreadRadius: -8,
+        offset: const Offset(0, 14),
+      ),
+    ];
+  }
 }
 
 /// Umumiy o'lchamlar.

@@ -28,10 +28,16 @@ class MiniPlayerBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    // Qorada mini pleer — eng yuqori qatlam (fondan ochroq), yorug'da — qora.
+    final cardColor = isDark ? AppColors.darkMiniPlayer : AppColors.ink;
+    final subtitleColor =
+        isDark ? AppColors.darkInkSoft : const Color(0xFF9DA3AD);
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 0, 12, 6),
       child: Material(
-        color: AppColors.ink,
+        color: cardColor,
         borderRadius: BorderRadius.circular(AppRadii.card),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
@@ -65,8 +71,8 @@ class MiniPlayerBar extends StatelessWidget {
                             song.displayArtist,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: Color(0xFF9DA3AD),
+                            style: TextStyle(
+                              color: subtitleColor,
                               fontSize: 12.5,
                             ),
                           ),
@@ -76,7 +82,7 @@ class MiniPlayerBar extends StatelessWidget {
                     IconButton(
                       onPressed: onFavorite,
                       iconSize: 22,
-                      color: song.isFavorite ? Colors.white : const Color(0xFF9DA3AD),
+                      color: song.isFavorite ? Colors.white : subtitleColor,
                       icon: Icon(
                         song.isFavorite
                             ? Icons.favorite
@@ -95,7 +101,8 @@ class MiniPlayerBar extends StatelessWidget {
                 height: 2,
                 child: LinearProgressIndicator(
                   value: progress.clamp(0.0, 1.0),
-                  backgroundColor: const Color(0xFF2A2E35),
+                  backgroundColor:
+                      isDark ? AppColors.darkLine : const Color(0xFF2A2E35),
                   valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
                 ),
               ),

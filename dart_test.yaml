@@ -1,0 +1,10 @@
+# Test teglari.
+#
+# `preview` — dizaynni ko'z bilan tekshirish uchun golden rasmlar.
+# Ular muhitga (shrift, platforma) bog'liq, shuning uchun CI'da ishlamaydi:
+#   flutter test --exclude-tags=preview
+# Rasmlarni yangilash:
+#   flutter test --update-goldens test/design_preview_test.dart
+tags:
+  preview:
+    skip: false

@@ -8,14 +8,14 @@ Widget _wrap(Widget child) => MaterialApp(home: Scaffold(body: child));
 
 void main() {
   group('EmptyState', () {
-    testWidgets('sarlavha, matn va tugmani koʻrsatadi', (tester) async {
+    testWidgets('sarlavha, matn va tugmani ko’rsatadi', (tester) async {
       var tapped = false;
       await tester.pumpWidget(
         _wrap(
           EmptyState(
             icon: Icons.music_note_rounded,
-            title: 'Kutubxona boʻsh',
-            message: 'Audio fayl qoʻshing',
+            title: 'Kutubxona bo’sh',
+            message: 'Audio fayl qo’shing',
             action: FilledButton(
               onPressed: () => tapped = true,
               child: const Text('Fayl tanlash'),
@@ -24,8 +24,8 @@ void main() {
         ),
       );
 
-      expect(find.text('Kutubxona boʻsh'), findsOneWidget);
-      expect(find.text('Audio fayl qoʻshing'), findsOneWidget);
+      expect(find.text('Kutubxona bo’sh'), findsOneWidget);
+      expect(find.text('Audio fayl qo’shing'), findsOneWidget);
       expect(find.byIcon(Icons.music_note_rounded), findsOneWidget);
 
       await tester.tap(find.text('Fayl tanlash'));
@@ -44,7 +44,7 @@ void main() {
   });
 
   group('AlbumArt', () {
-    testWidgets('rasmsiz qoʻshiq uchun oʻrindosh koʻrsatiladi', (tester) async {
+    testWidgets('rasmsiz qo’shiq uchun o’rindosh ko’rsatiladi', (tester) async {
       final song = Song(
         id: '1',
         filePath: '/music/a.mp3',
@@ -58,7 +58,7 @@ void main() {
       expect(find.byType(Image), findsNothing);
     });
 
-    testWidgets('qoʻshiq null boʻlsa ham yiqilmaydi', (tester) async {
+    testWidgets('qo’shiq null bo’lsa ham yiqilmaydi', (tester) async {
       await tester.pumpWidget(_wrap(const AlbumArt(song: null)));
       expect(find.byType(AlbumArt), findsOneWidget);
     });

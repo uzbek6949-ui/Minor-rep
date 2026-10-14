@@ -46,7 +46,7 @@ class Song {
   bool get hasLyrics => (lyrics ?? '').trim().isNotEmpty;
 
   String get displayArtist =>
-      artist.trim().isEmpty ? 'Nomaʼlum ijrochi' : artist;
+      artist.trim().isEmpty ? 'Noma’lum ijrochi' : artist;
 
   /// Qidiruv uchun bir qatorga jamlangan matn.
   String get searchIndex => '$title $artist $album $genre'.toLowerCase();

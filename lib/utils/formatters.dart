@@ -12,4 +12,4 @@ String formatDuration(Duration duration) {
 }
 
 /// "12 qo'shiq" kabi matn.
-String songCountLabel(int count) => '$count qoʻshiq';
+String songCountLabel(int count) => '$count qo’shiq';

@@ -72,7 +72,7 @@ class _SongEditScreenState extends State<SongEditScreen> {
         appBar: AppBar(),
         body: const EmptyState(
           icon: Icons.error_outline_rounded,
-          title: 'Qoʻshiq topilmadi',
+          title: 'Qo’shiq topilmadi',
         ),
       );
     }
@@ -115,7 +115,7 @@ class _SongEditScreenState extends State<SongEditScreen> {
                 validator:
                     (value) =>
                         (value == null || value.trim().isEmpty)
-                            ? 'Nomi boʻsh boʻlmasligi kerak'
+                            ? 'Nomi bo’sh bo’lmasligi kerak'
                             : null,
               ),
               const SizedBox(height: 14),
@@ -147,7 +147,7 @@ class _SongEditScreenState extends State<SongEditScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                        'Fayl maʻlumoti',
+                        'Fayl ma’lumoti',
                         style: Theme.of(context).textTheme.labelLarge,
                       ),
                       const SizedBox(height: 8),

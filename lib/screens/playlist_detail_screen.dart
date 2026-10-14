@@ -41,7 +41,7 @@ class PlaylistDetailScreen extends StatelessWidget {
         title: Text(playlist.name),
         actions: <Widget>[
           IconButton(
-            tooltip: 'Qoʻshiq qoʻshish',
+            tooltip: 'Qo’shiq qo’shish',
             onPressed: () => _pickSongs(context, library, playlistId),
             icon: const Icon(Icons.playlist_add_rounded),
           ),
@@ -93,15 +93,15 @@ class PlaylistDetailScreen extends StatelessWidget {
                 songs.isEmpty
                     ? EmptyState(
                       icon: Icons.queue_music_rounded,
-                      title: 'Playlist boʻsh',
+                      title: 'Playlist bo’sh',
                       message:
-                          'Kutubxonadan qoʻshiq tanlab, '
-                          'shu playlistga qoʻshing.',
+                          'Kutubxonadan qo’shiq tanlab, '
+                          'shu playlistga qo’shing.',
                       action: FilledButton.icon(
                         onPressed:
                             () => _pickSongs(context, library, playlistId),
                         icon: const Icon(Icons.add_rounded),
-                        label: const Text('Qoʻshiq qoʻshish'),
+                        label: const Text('Qo’shiq qo’shish'),
                       ),
                     )
                     : ReorderableListView.builder(
@@ -204,7 +204,7 @@ class _SongPickerSheetState extends State<_SongPickerSheet> {
               child: TextField(
                 autofocus: false,
                 decoration: const InputDecoration(
-                  hintText: 'Qoʻshiq izlash...',
+                  hintText: 'Qo’shiq izlash...',
                   prefixIcon: Icon(Icons.search_rounded),
                 ),
                 onChanged: (value) => setState(() => _query = value),
@@ -215,7 +215,7 @@ class _SongPickerSheetState extends State<_SongPickerSheet> {
                   visible.isEmpty
                       ? const EmptyState(
                         icon: Icons.music_off_rounded,
-                        title: 'Qoʻshadigan qoʻshiq yoʻq',
+                        title: 'Qo’shadigan qo’shiq yo’q',
                       )
                       : ListView.builder(
                         itemCount: visible.length,
@@ -260,7 +260,7 @@ class _SongPickerSheetState extends State<_SongPickerSheet> {
                                   .where((song) => _selected.contains(song.id))
                                   .toList(),
                             ),
-                    child: const Text('Qoʻshish'),
+                    child: const Text('Qo’shish'),
                   ),
                 ],
               ),

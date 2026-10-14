@@ -29,9 +29,9 @@ class PlaylistsScreen extends StatelessWidget {
           playlists.isEmpty
               ? EmptyState(
                 icon: Icons.queue_music_rounded,
-                title: 'Playlist yoʻq',
+                title: 'Playlist yo’q',
                 message:
-                    'Qoʻshiqlarni mavzu yoki kayfiyat boʻyicha '
+                    'Qo’shiqlarni mavzu yoki kayfiyat bo’yicha '
                     'guruhlash uchun playlist yarating.',
                 action: FilledButton.icon(
                   onPressed: () => _createPlaylist(context, library),
@@ -64,7 +64,7 @@ class PlaylistsScreen extends StatelessWidget {
                           final name = await promptPlaylistName(
                             context,
                             initialValue: playlist.name,
-                            title: 'Nomini oʻzgartirish',
+                            title: 'Nomini o’zgartirish',
                           );
                           if (name == null || name.trim().isEmpty) return;
                           await library.renamePlaylist(playlist, name);
@@ -84,14 +84,14 @@ class PlaylistsScreen extends StatelessWidget {
                               value: 'rename',
                               child: ListTile(
                                 leading: Icon(Icons.edit_rounded),
-                                title: Text('Nomini oʻzgartirish'),
+                                title: Text('Nomini o’zgartirish'),
                               ),
                             ),
                             PopupMenuItem<String>(
                               value: 'delete',
                               child: ListTile(
                                 leading: Icon(Icons.delete_outline_rounded),
-                                title: Text('Playlistni oʻchirish'),
+                                title: Text('Playlistni o’chirish'),
                               ),
                             ),
                           ],
@@ -122,9 +122,9 @@ class PlaylistsScreen extends StatelessWidget {
       context: context,
       builder:
           (dialogContext) => AlertDialog(
-            title: const Text('Playlist oʻchirilsinmi?'),
+            title: const Text('Playlist o’chirilsinmi?'),
             content: Text(
-              '"${playlist.name}" oʻchiriladi. Qoʻshiqlar kutubxonada qoladi.',
+              '"${playlist.name}" o’chiriladi. Qo’shiqlar kutubxonada qoladi.',
             ),
             actions: <Widget>[
               TextButton(
@@ -133,7 +133,7 @@ class PlaylistsScreen extends StatelessWidget {
               ),
               FilledButton(
                 onPressed: () => Navigator.of(dialogContext).pop(true),
-                child: const Text('Oʻchirish'),
+                child: const Text('O’chirish'),
               ),
             ],
           ),

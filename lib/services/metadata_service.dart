@@ -113,7 +113,7 @@ class MetadataService {
 
   static String _titleFromFileName(String filePath) {
     final name = p.basenameWithoutExtension(filePath).trim();
-    return name.isEmpty ? 'Nomsiz qoʻshiq' : name;
+    return name.isEmpty ? 'Nomsiz qo’shiq' : name;
   }
 }
 

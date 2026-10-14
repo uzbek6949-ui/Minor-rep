@@ -37,7 +37,7 @@ class _AddToPlaylistSheet extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
               child: Text(
-                'Playlistga qoʻshish',
+                'Playlistga qo’shish',
                 style: Theme.of(
                   context,
                 ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
@@ -61,7 +61,7 @@ class _AddToPlaylistSheet extends StatelessWidget {
                       ? const Padding(
                         padding: EdgeInsets.all(24),
                         child: Text(
-                          'Hali playlist yoʻq. Yuqoridagi tugma bilan '
+                          'Hali playlist yo’q. Yuqoridagi tugma bilan '
                           'birinchi playlistni yaratishingiz mumkin.',
                           textAlign: TextAlign.center,
                         ),

@@ -3,43 +3,55 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../models/song.dart';
+import '../theme/app_theme.dart';
 
-/// Albom rasmi. Rasm bo'lmasa — chiroyli gradient va nota belgisi.
+/// Albom rasmi. Rasm bo'lmasa — nozik gradient va nota belgisi.
 class AlbumArt extends StatelessWidget {
   const AlbumArt({
     super.key,
     required this.song,
     this.size = 52,
-    this.radius = 12,
+    this.radius = AppRadii.tile,
+    this.shadow,
   });
 
   final Song? song;
   final double size;
   final double radius;
 
+  /// Soya: katta rasm uchun [AppShadows.artwork], qatorlar uchun yengil.
+  final List<BoxShadow>? shadow;
+
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     final path = song?.artworkPath;
     final hasArt = path != null && File(path).existsSync();
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(radius),
-      child:
-          hasArt
-              ? Image.file(
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radius),
+        boxShadow: shadow,
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(radius),
+        child: hasArt
+            ? Image.file(
                 File(path),
                 width: size,
                 height: size,
                 fit: BoxFit.cover,
                 gaplessPlayback: true,
-                errorBuilder: (context, _, __) => _placeholder(scheme),
+                errorBuilder: (context, _, __) => _placeholder(context),
               )
-              : _placeholder(scheme),
+            : _placeholder(context),
+      ),
     );
   }
 
-  Widget _placeholder(ColorScheme scheme) {
+  Widget _placeholder(BuildContext context) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
     return Container(
       width: size,
       height: size,
@@ -47,16 +59,15 @@ class AlbumArt extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: <Color>[
-            scheme.primary.withValues(alpha: 0.75),
-            scheme.tertiary.withValues(alpha: 0.65),
-          ],
+          colors: isLight
+              ? const <Color>[Color(0xFFDFE3EA), Color(0xFFC4CAD4)]
+              : const <Color>[Color(0xFF272B32), Color(0xFF171A1F)],
         ),
       ),
       child: Icon(
         Icons.music_note_rounded,
-        size: size * 0.45,
-        color: Colors.white.withValues(alpha: 0.9),
+        size: size * 0.42,
+        color: isLight ? AppColors.inkSoft : AppColors.darkInkSoft,
       ),
     );
   }

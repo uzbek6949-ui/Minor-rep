@@ -45,7 +45,8 @@ class MinorRepApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light(),
         darkTheme: AppTheme.dark(),
-        themeMode: ThemeMode.dark,
+        // Qora rejim dizayni hali tanlanmagan — hozircha yorug' rejim.
+        themeMode: ThemeMode.light,
         home: const RootScreen(),
       ),
     );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../widgets/app_bottom_nav.dart';
 import '../widgets/mini_player.dart';
 import 'playlists_screen.dart';
 import 'search_screen.dart';
@@ -22,6 +23,24 @@ class _RootScreenState extends State<RootScreen> {
     SearchScreen(),
   ];
 
+  static const List<AppBottomNavItem> _items = <AppBottomNavItem>[
+    AppBottomNavItem(
+      icon: Icons.home_outlined,
+      activeIcon: Icons.home_rounded,
+      label: 'Bosh sahifa',
+    ),
+    AppBottomNavItem(
+      icon: Icons.library_music_outlined,
+      activeIcon: Icons.library_music_rounded,
+      label: 'Playlistlar',
+    ),
+    AppBottomNavItem(
+      icon: Icons.search_rounded,
+      activeIcon: Icons.search_rounded,
+      label: 'Qidiruv',
+    ),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,26 +49,10 @@ class _RootScreenState extends State<RootScreen> {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           const MiniPlayer(),
-          NavigationBar(
-            selectedIndex: _index,
-            onDestinationSelected: (value) => setState(() => _index = value),
-            destinations: const <Widget>[
-              NavigationDestination(
-                icon: Icon(Icons.library_music_outlined),
-                selectedIcon: Icon(Icons.library_music_rounded),
-                label: 'Qoʻshiqlar',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.queue_music_outlined),
-                selectedIcon: Icon(Icons.queue_music_rounded),
-                label: 'Playlistlar',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.search_outlined),
-                selectedIcon: Icon(Icons.search_rounded),
-                label: 'Qidiruv',
-              ),
-            ],
+          AppBottomNav(
+            currentIndex: _index,
+            onChanged: (value) => setState(() => _index = value),
+            items: _items,
           ),
         ],
       ),

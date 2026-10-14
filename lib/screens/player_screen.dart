@@ -5,14 +5,16 @@ import 'package:provider/provider.dart';
 import '../models/song.dart';
 import '../state/library_controller.dart';
 import '../state/player_controller.dart';
+import '../theme/app_theme.dart';
 import '../utils/formatters.dart';
-import '../widgets/add_to_playlist_sheet.dart';
 import '../widgets/album_art.dart';
 import '../widgets/empty_state.dart';
+import '../widgets/player_controls.dart';
+import '../widgets/song_tile.dart';
+import '../widgets/waveform_progress.dart';
 import 'lyrics_screen.dart';
-import 'song_edit_screen.dart';
 
-/// To'liq pleer ekrani: katta albom rasmi, boshqaruv tugmalari, Lyrics tugmasi.
+/// To'liq pleer ekrani: katta albom rasmi, to'lqinli progress, boshqaruv.
 class PlayerScreen extends StatelessWidget {
   const PlayerScreen({super.key});
 
@@ -24,9 +26,7 @@ class PlayerScreen extends StatelessWidget {
     final controller = context.watch<PlayerController>();
     final library = context.watch<LibraryController>();
     final current = controller.currentSong;
-    // Kutubxonadagi eng yangi nusxa (nom/matn tahrirlangan bo'lishi mumkin).
-    final song =
-        current == null ? null : library.songById(current.id) ?? current;
+    final song = current == null ? null : library.songById(current.id) ?? current;
 
     if (song == null) {
       return Scaffold(
@@ -34,115 +34,104 @@ class PlayerScreen extends StatelessWidget {
         body: const EmptyState(
           icon: Icons.play_circle_outline_rounded,
           title: 'Hozir hech narsa ijro etilmayapti',
-          message: 'Kutubxonadan qoʻshiq tanlang.',
+          message: 'Kutubxonadan qo’shiq tanlang.',
         ),
       );
     }
 
-    final scheme = Theme.of(context).colorScheme;
-
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          controller.queueLabel.isEmpty
-              ? 'Hozir ijroda'
-              : controller.queueLabel,
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        actions: <Widget>[
-          IconButton(
-            tooltip: 'Navbat',
-            onPressed: () => _showQueue(context, controller),
-            icon: const Icon(Icons.queue_music_rounded),
-          ),
-          IconButton(
-            tooltip: 'Tahrirlash',
-            onPressed:
-                () => Navigator.of(context).push(SongEditScreen.route(song)),
-            icon: const Icon(Icons.edit_rounded),
-          ),
-        ],
-      ),
       body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final artSize = constraints.maxWidth.clamp(0.0, 420.0) - 48;
-            return SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  children: <Widget>[
-                    const SizedBox(height: 8),
-                    Center(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(28),
-                          boxShadow: <BoxShadow>[
-                            BoxShadow(
-                              color: scheme.primary.withValues(alpha: 0.25),
-                              blurRadius: 40,
-                              offset: const Offset(0, 18),
+        child: Column(
+          children: <Widget>[
+            _TopBar(
+              label: controller.queueLabel.isEmpty
+                  ? 'Hozir ijroda'
+                  : controller.queueLabel,
+              onQueue: () => _showQueue(context, controller),
+            ),
+            Expanded(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final artSize = (constraints.maxWidth - 88).clamp(140.0, 340.0);
+                  return SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(28, 4, 28, 20),
+                    child: Column(
+                      children: <Widget>[
+                        SizedBox(height: constraints.maxHeight * 0.02),
+                        AlbumArt(
+                          song: song,
+                          size: artSize.toDouble(),
+                          radius: AppRadii.artwork,
+                          shadow: AppShadows.artwork(),
+                        ),
+                        const SizedBox(height: 34),
+                        _TitleRow(
+                          song: song,
+                          onFavorite: () => library.toggleFavorite(song),
+                          onMenu: () => showSongMenu(context, song: song),
+                        ),
+                        const SizedBox(height: 26),
+                        StreamBuilder<PositionData>(
+                          stream: controller.positionDataStream,
+                          builder: (context, snapshot) {
+                            final data = snapshot.data ?? PositionData.zero;
+                            return WaveformProgress(
+                              seed: song.id,
+                              position: data.position,
+                              duration: data.duration.inMilliseconds > 0
+                                  ? data.duration
+                                  : song.duration,
+                              onSeek: controller.seek,
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 14),
+                        StreamBuilder<PlayerState>(
+                          stream: controller.player.playerStateStream,
+                          builder: (context, snapshot) {
+                            final state = snapshot.data;
+                            final processing = state?.processingState;
+                            return PlayerControls(
+                              isPlaying: state?.playing ?? false,
+                              shuffleEnabled: controller.shuffleEnabled,
+                              loopMode: controller.loopMode,
+                              isLoading: processing == ProcessingState.loading ||
+                                  processing == ProcessingState.buffering,
+                              onShuffle: controller.toggleShuffle,
+                              onPrevious: controller.previous,
+                              onPlayPause: controller.togglePlayPause,
+                              onNext: controller.next,
+                              onRepeat: controller.cycleRepeatMode,
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 18),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            OutlinedButton.icon(
+                              onPressed: () => Navigator.of(context)
+                                  .push(LyricsScreen.route(song)),
+                              icon: const Icon(Icons.subject_rounded, size: 19),
+                              label: Text(
+                                song.hasLyrics ? 'Lyrics' : 'Lyrics qo’shish',
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            OutlinedButton.icon(
+                              onPressed: () => _showQueue(context, controller),
+                              icon: const Icon(Icons.queue_music_rounded, size: 19),
+                              label: Text(songCountLabel(controller.queue.length)),
                             ),
                           ],
                         ),
-                        child: AlbumArt(
-                          song: song,
-                          size: artSize < 160 ? 160 : artSize,
-                          radius: 28,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 28),
-                    Row(
-                      children: <Widget>[
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text(
-                                song.title,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.headlineSmall
-                                    ?.copyWith(fontWeight: FontWeight.w700),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                song.album.trim().isEmpty
-                                    ? song.displayArtist
-                                    : '${song.displayArtist} • ${song.album}',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.bodyMedium
-                                    ?.copyWith(color: scheme.onSurfaceVariant),
-                              ),
-                            ],
-                          ),
-                        ),
-                        IconButton(
-                          tooltip: 'Sevimli',
-                          onPressed: () => library.toggleFavorite(song),
-                          icon: Icon(
-                            song.isFavorite
-                                ? Icons.favorite_rounded
-                                : Icons.favorite_border_rounded,
-                            color: song.isFavorite ? scheme.primary : null,
-                          ),
-                        ),
                       ],
                     ),
-                    const SizedBox(height: 16),
-                    _ProgressBar(controller: controller),
-                    const SizedBox(height: 8),
-                    _Controls(controller: controller),
-                    const SizedBox(height: 12),
-                    _SecondaryActions(song: song),
-                    const SizedBox(height: 24),
-                  ],
-                ),
+                  );
+                },
               ),
-            );
-          },
+            ),
+          ],
         ),
       ),
     );
@@ -161,13 +150,16 @@ class PlayerScreen extends StatelessWidget {
             child: Column(
               children: <Widget>[
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
+                  padding: const EdgeInsets.fromLTRB(22, 0, 22, 10),
                   child: Row(
                     children: <Widget>[
                       Expanded(
                         child: Text(
                           'Navbat • ${songCountLabel(queue.length)}',
-                          style: Theme.of(sheetContext).textTheme.titleMedium,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
                     ],
@@ -180,18 +172,15 @@ class PlayerScreen extends StatelessWidget {
                       final item = queue[index];
                       final isCurrent = controller.currentIndex == index;
                       return ListTile(
-                        leading: AlbumArt(song: item, size: 44, radius: 10),
+                        leading: AlbumArt(song: item, size: 44, radius: 12),
                         title: Text(
                           item.title,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
+                            fontSize: 14.5,
                             fontWeight:
                                 isCurrent ? FontWeight.w700 : FontWeight.w500,
-                            color:
-                                isCurrent
-                                    ? Theme.of(context).colorScheme.primary
-                                    : null,
                           ),
                         ),
                         subtitle: Text(
@@ -217,171 +206,102 @@ class PlayerScreen extends StatelessWidget {
   }
 }
 
-class _ProgressBar extends StatefulWidget {
-  const _ProgressBar({required this.controller});
+class _TopBar extends StatelessWidget {
+  const _TopBar({required this.label, required this.onQueue});
 
-  final PlayerController controller;
-
-  @override
-  State<_ProgressBar> createState() => _ProgressBarState();
-}
-
-class _ProgressBarState extends State<_ProgressBar> {
-  double? _dragValue;
+  final String label;
+  final VoidCallback onQueue;
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<PositionData>(
-      stream: widget.controller.positionDataStream,
-      builder: (context, snapshot) {
-        final data = snapshot.data ?? PositionData.zero;
-        final totalMs = data.duration.inMilliseconds.toDouble();
-        final hasDuration = totalMs > 0;
-        final maxMs = hasDuration ? totalMs : 1.0;
-        final positionMs = data.position.inMilliseconds.toDouble();
-        final value = (_dragValue ?? positionMs).clamp(0.0, maxMs);
-
-        return Column(
-          children: <Widget>[
-            Slider(
-              min: 0,
-              max: maxMs,
-              value: hasDuration ? value : 0.0,
-              onChanged:
-                  !hasDuration
-                      ? null
-                      : (next) => setState(() => _dragValue = next),
-              onChangeEnd: (next) {
-                widget.controller.seek(Duration(milliseconds: next.round()));
-                setState(() => _dragValue = null);
-              },
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 6, 8, 2),
+      child: Row(
+        children: <Widget>[
+          IconButton(
+            onPressed: () => Navigator.of(context).maybePop(),
+            icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 30),
+            tooltip: 'Yopish',
+          ),
+          Expanded(
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w600),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Text(
-                    formatDuration(Duration(milliseconds: value.round())),
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                  Text(
-                    formatDuration(data.duration),
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        );
-      },
+          ),
+          IconButton(
+            onPressed: onQueue,
+            icon: const Icon(Icons.queue_music_rounded, size: 26),
+            tooltip: 'Navbat',
+          ),
+        ],
+      ),
     );
   }
 }
 
-class _Controls extends StatelessWidget {
-  const _Controls({required this.controller});
+class _TitleRow extends StatelessWidget {
+  const _TitleRow({
+    required this.song,
+    required this.onFavorite,
+    required this.onMenu,
+  });
 
-  final PlayerController controller;
+  final Song song;
+  final VoidCallback onFavorite;
+  final VoidCallback onMenu;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final loopMode = controller.loopMode;
-
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
         IconButton(
-          tooltip: 'Tasodifiy tartib',
-          onPressed: controller.toggleShuffle,
+          onPressed: onFavorite,
+          iconSize: 24,
+          color: song.isFavorite ? scheme.onSurface : scheme.onSurfaceVariant,
           icon: Icon(
-            Icons.shuffle_rounded,
-            color: controller.shuffleEnabled ? scheme.primary : null,
+            song.isFavorite ? Icons.favorite : Icons.favorite_border_rounded,
           ),
         ),
-        IconButton(
-          tooltip: 'Oldingi',
-          iconSize: 38,
-          onPressed: controller.previous,
-          icon: const Icon(Icons.skip_previous_rounded),
-        ),
-        StreamBuilder<PlayerState>(
-          stream: controller.player.playerStateStream,
-          builder: (context, snapshot) {
-            final state = snapshot.data;
-            final processing = state?.processingState;
-            final loading =
-                processing == ProcessingState.loading ||
-                processing == ProcessingState.buffering;
-            final playing = state?.playing ?? false;
-
-            if (loading) {
-              return const SizedBox(
-                width: 72,
-                height: 72,
-                child: Center(child: CircularProgressIndicator()),
-              );
-            }
-
-            return IconButton(
-              tooltip: playing ? 'Toʻxtatish' : 'Ijro etish',
-              iconSize: 72,
-              onPressed: controller.togglePlayPause,
-              icon: Icon(
-                playing
-                    ? Icons.pause_circle_filled_rounded
-                    : Icons.play_circle_fill_rounded,
-                color: scheme.primary,
+        Expanded(
+          child: Column(
+            children: <Widget>[
+              Text(
+                song.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 25,
+                  fontWeight: FontWeight.w700,
+                  height: 1.15,
+                ),
               ),
-            );
-          },
-        ),
-        IconButton(
-          tooltip: 'Keyingi',
-          iconSize: 38,
-          onPressed: controller.next,
-          icon: const Icon(Icons.skip_next_rounded),
-        ),
-        IconButton(
-          tooltip: switch (loopMode) {
-            LoopMode.off => 'Takrorlash: oʻchirilgan',
-            LoopMode.all => 'Takrorlash: barchasi',
-            LoopMode.one => 'Takrorlash: bitta qoʻshiq',
-          },
-          onPressed: controller.cycleRepeatMode,
-          icon: Icon(
-            loopMode == LoopMode.one
-                ? Icons.repeat_one_rounded
-                : Icons.repeat_rounded,
-            color: loopMode == LoopMode.off ? null : scheme.primary,
+              const SizedBox(height: 4),
+              Text(
+                song.album.trim().isEmpty
+                    ? song.displayArtist
+                    : '${song.displayArtist} • ${song.album}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14.5,
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+            ],
           ),
         ),
-      ],
-    );
-  }
-}
-
-class _SecondaryActions extends StatelessWidget {
-  const _SecondaryActions({required this.song});
-
-  final Song song;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        FilledButton.tonalIcon(
-          onPressed: () => Navigator.of(context).push(LyricsScreen.route(song)),
-          icon: const Icon(Icons.lyrics_rounded),
-          label: Text(song.hasLyrics ? 'Lyrics' : 'Lyrics qoʻshish'),
-        ),
-        const SizedBox(width: 12),
-        OutlinedButton.icon(
-          onPressed: () => showAddToPlaylistSheet(context, song),
-          icon: const Icon(Icons.playlist_add_rounded),
-          label: const Text('Playlist'),
+        IconButton(
+          onPressed: onMenu,
+          iconSize: 24,
+          color: scheme.onSurfaceVariant,
+          icon: const Icon(Icons.more_horiz_rounded),
         ),
       ],
     );

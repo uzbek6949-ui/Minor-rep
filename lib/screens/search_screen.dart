@@ -51,7 +51,7 @@ class _SearchScreenState extends State<SearchScreen> {
               controller: _controller,
               textInputAction: TextInputAction.search,
               decoration: InputDecoration(
-                hintText: 'Qoʻshiq nomi yoki ijrochi...',
+                hintText: 'Qo’shiq nomi yoki ijrochi...',
                 prefixIcon: const Icon(Icons.search_rounded),
                 suffixIcon:
                     _query.isEmpty
@@ -130,14 +130,14 @@ class _SearchScreenState extends State<SearchScreen> {
                       icon: Icons.search_rounded,
                       title: 'Qidirishni boshlang',
                       message:
-                          'Qoʻshiq nomi yoki ijrochi nomini yozing, '
+                          'Qo’shiq nomi yoki ijrochi nomini yozing, '
                           'yoki janr/playlist filtridan foydalaning.',
                     )
                     : results.isEmpty
                     ? const EmptyState(
                       icon: Icons.search_off_rounded,
                       title: 'Hech narsa topilmadi',
-                      message: 'Boshqa soʻz bilan qidirib koʻring.',
+                      message: 'Boshqa so’z bilan qidirib ko’ring.',
                     )
                     : ListView.builder(
                       padding: const EdgeInsets.only(bottom: 96),

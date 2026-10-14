@@ -65,7 +65,7 @@ class _LyricsScreenState extends State<LyricsScreen> {
         appBar: AppBar(),
         body: const EmptyState(
           icon: Icons.error_outline_rounded,
-          title: 'Qoʻshiq topilmadi',
+          title: 'Qo’shiq topilmadi',
         ),
       );
     }
@@ -117,8 +117,8 @@ class _LyricsScreenState extends State<LyricsScreen> {
                           keyboardType: TextInputType.multiline,
                           decoration: const InputDecoration(
                             hintText:
-                                'Qoʻshiq soʻzlarini shu yerga '
-                                'yozing yoki qoʻyib (paste) qoʻying...',
+                                'Qo’shiq so’zlarini shu yerga '
+                                'yozing yoki qo’yib (paste) qo’ying...',
                             alignLabelWithHint: true,
                           ),
                         ),
@@ -158,14 +158,14 @@ class _LyricsScreenState extends State<LyricsScreen> {
                   )
                   : EmptyState(
                     icon: Icons.lyrics_rounded,
-                    title: 'Matn hali yoʻq',
+                    title: 'Matn hali yo’q',
                     message:
-                        'Qoʻshiq soʻzlarini qoʻlda '
-                        'yozib qoʻyishingiz mumkin.',
+                        'Qo’shiq so’zlarini qo’lda '
+                        'yozib qo’yishingiz mumkin.',
                     action: FilledButton.icon(
                       onPressed: () => setState(() => _editing = true),
                       icon: const Icon(Icons.edit_rounded),
-                      label: const Text('Matn qoʻshish'),
+                      label: const Text('Matn qo’shish'),
                     ),
                   ),
         ),

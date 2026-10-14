@@ -52,7 +52,7 @@ Future<File> _writeTempFile(String name, List<int> bytes) async {
 void main() {
   group('Id3Reader — ID3v2.3', () {
     test(
-      'nom, ijrochi, albom, janr, davomiylik, matn va rasmni oʻqiydi',
+      'nom, ijrochi, albom, janr, davomiylik, matn va rasmni o’qiydi',
       () async {
         final frames = <int>[
           ..._frame('TIT2', <int>[0x00, ...latin1.encode('Tungi Yulduz')]),
@@ -106,7 +106,7 @@ void main() {
 
     test('UTF-8 va PNG rasm bilan ishlaydi', () async {
       final frames = <int>[
-        ..._frame('TIT2', <int>[0x03, ...utf8.encode('Qoʻshiq — 1')]),
+        ..._frame('TIT2', <int>[0x03, ...utf8.encode('Qo’shiq — 1')]),
         ..._frame('APIC', <int>[
           0x00,
           ...latin1.encode('image/png'),
@@ -128,14 +128,14 @@ void main() {
       final tags = await Id3Reader.read(
         await _writeTempFile('utf8.mp3', bytes),
       );
-      expect(tags.title, 'Qoʻshiq — 1');
+      expect(tags.title, 'Qo’shiq — 1');
       expect(tags.artworkExtension, 'png');
       expect(tags.artwork!.length, 4);
     });
   });
 
   group('Id3Reader — ID3v1', () {
-    test('v2 tegi boʻlmasa, oxiridagi TAG bloki oʻqiladi', () async {
+    test('v2 tegi bo’lmasa, oxiridagi TAG bloki o’qiladi', () async {
       final bytes = <int>[
         ...List<int>.filled(256, 0x41), // "audio"
         ...latin1.encode('TAG'),
@@ -157,7 +157,7 @@ void main() {
   });
 
   group('Id3Reader — xatoliklarga chidamlilik', () {
-    test('tegsiz fayl boʻsh natija beradi', () async {
+    test('tegsiz fayl bo’sh natija beradi', () async {
       final file = await _writeTempFile(
         'plain.mp3',
         List<int>.filled(512, 0x33),
@@ -174,7 +174,7 @@ void main() {
       expect(tags.title, isNull);
     });
 
-    test('mavjud boʻlmagan fayl boʻsh natija beradi', () async {
+    test('mavjud bo’lmagan fayl bo’sh natija beradi', () async {
       final tags = await Id3Reader.read(File('/does/not/exist.mp3'));
       expect(tags.title, isNull);
       expect(tags.durationMs, isNull);

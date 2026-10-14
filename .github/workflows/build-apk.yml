@@ -48,7 +48,8 @@ jobs:
         run: flutter analyze
 
       - name: Testlar
-        run: flutter test
+        # Dizayn golden rasmlari muhitga bog'liq — CI'da o'tkazib yuboriladi.
+        run: flutter test --exclude-tags=preview
 
       - name: APK qurish
         run: flutter build apk --release

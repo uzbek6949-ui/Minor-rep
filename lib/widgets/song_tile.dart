@@ -7,11 +7,10 @@ import '../screens/lyrics_screen.dart';
 import '../screens/song_edit_screen.dart';
 import '../state/library_controller.dart';
 import '../state/player_controller.dart';
-import '../utils/formatters.dart';
 import 'add_to_playlist_sheet.dart';
-import 'album_art.dart';
+import 'song_row.dart';
 
-/// Ro'yxatdagi bitta qo'shiq qatori — bosilganda ijro boshlanadi.
+/// [SongRow]ni ilova holatiga ulaydi: bosilganda ijro, menyudagi amallar.
 class SongTile extends StatelessWidget {
   const SongTile({
     super.key,
@@ -20,8 +19,8 @@ class SongTile extends StatelessWidget {
     this.queueLabel = '',
     this.queueSourceId,
     this.playlist,
-    this.showHandle = false,
     this.index,
+    this.showHandle = false,
   });
 
   final Song song;
@@ -34,219 +33,164 @@ class SongTile extends StatelessWidget {
   /// Agar qator playlist ichida ko'rsatilsa — "olib tashlash" amali chiqadi.
   final Playlist? playlist;
 
-  final bool showHandle;
   final int? index;
+  final bool showHandle;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     final playerController = context.watch<PlayerController>();
     final isCurrent = playerController.currentSong?.id == song.id;
 
-    return ListTile(
-      onTap:
-          () => playerController.playSong(
-            song,
-            inList: queue ?? <Song>[song],
-            label: queueLabel,
-            sourceId: queueSourceId,
-          ),
-      leading: Stack(
-        alignment: Alignment.center,
-        children: <Widget>[
-          AlbumArt(song: song, size: 52),
-          if (isCurrent)
-            Container(
-              width: 52,
-              height: 52,
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.45),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                playerController.isPlaying
-                    ? Icons.equalizer_rounded
-                    : Icons.pause_rounded,
-                color: Colors.white,
-              ),
-            ),
-        ],
+    return SongRow(
+      song: song,
+      index: index,
+      isCurrent: isCurrent,
+      isPlaying: isCurrent && playerController.isPlaying,
+      onTap: () => playerController.playSong(
+        song,
+        inList: queue ?? <Song>[song],
+        label: queueLabel,
+        sourceId: queueSourceId,
       ),
-      title: Text(
-        song.title,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          fontWeight: FontWeight.w600,
-          color: isCurrent ? scheme.primary : null,
-        ),
-      ),
-      subtitle: Text(
-        '${song.displayArtist} • ${formatDuration(song.duration)}',
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          if (song.isFavorite)
-            Icon(Icons.favorite_rounded, size: 18, color: scheme.primary),
-          if (song.hasLyrics)
-            Padding(
-              padding: const EdgeInsets.only(left: 6),
-              child: Icon(
-                Icons.lyrics_rounded,
-                size: 18,
-                color: scheme.onSurfaceVariant,
-              ),
-            ),
-          if (showHandle && index != null)
-            ReorderableDragStartListener(
-              index: index!,
-              child: const Padding(
-                padding: EdgeInsets.only(left: 6),
-                child: Icon(Icons.drag_handle_rounded),
+      trailing: showHandle && index != null
+          ? ReorderableDragStartListener(
+              index: index! - 1 < 0 ? 0 : index! - 1,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Icon(
+                  Icons.drag_handle_rounded,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             )
-          else
-            _SongMenu(song: song, playlist: playlist),
-        ],
+          : null,
+      onMenu: () => showSongMenu(
+        context,
+        song: song,
+        playlist: playlist,
       ),
     );
   }
 }
 
-class _SongMenu extends StatelessWidget {
-  const _SongMenu({required this.song, this.playlist});
+/// Qo'shiq amallari — pastdan chiqadigan menyu.
+Future<void> showSongMenu(
+  BuildContext context, {
+  required Song song,
+  Playlist? playlist,
+}) async {
+  final library = context.read<LibraryController>();
+  final playerController = context.read<PlayerController>();
 
-  final Song song;
-  final Playlist? playlist;
+  final action = await showModalBottomSheet<String>(
+    context: context,
+    showDragHandle: true,
+    builder: (sheetContext) {
+      Widget item(IconData icon, String title, String value) => ListTile(
+            leading: Icon(icon),
+            title: Text(
+              title,
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+            ),
+            onTap: () => Navigator.of(sheetContext).pop(value),
+          );
 
-  @override
-  Widget build(BuildContext context) {
-    final library = context.read<LibraryController>();
-    final playerController = context.read<PlayerController>();
-
-    return PopupMenuButton<String>(
-      icon: const Icon(Icons.more_vert_rounded),
-      onSelected: (value) async {
-        switch (value) {
-          case 'play':
-            await playerController.playSong(song);
-            break;
-          case 'playlist':
-            await showAddToPlaylistSheet(context, song);
-            break;
-          case 'lyrics':
-            await Navigator.of(context).push(LyricsScreen.route(song));
-            break;
-          case 'edit':
-            await Navigator.of(context).push(SongEditScreen.route(song));
-            break;
-          case 'favorite':
-            await library.toggleFavorite(song);
-            break;
-          case 'remove':
-            final target = playlist;
-            if (target != null) {
-              await library.removeSongFromPlaylist(target, song.id);
-            }
-            break;
-          case 'delete':
-            final confirmed = await _confirmDelete(context);
-            if (confirmed != true) return;
-            await playerController.handleSongRemoved(song.id);
-            await library.deleteSong(song);
-            break;
-        }
-      },
-      itemBuilder:
-          (context) => <PopupMenuEntry<String>>[
-            const PopupMenuItem<String>(
-              value: 'play',
-              child: ListTile(
-                leading: Icon(Icons.play_arrow_rounded),
-                title: Text('Ijro etish'),
+      return SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Text(
+                      song.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            const PopupMenuItem<String>(
-              value: 'playlist',
-              child: ListTile(
-                leading: Icon(Icons.playlist_add_rounded),
-                title: Text('Playlistga qoʻshish'),
-              ),
+            item(Icons.play_arrow_rounded, 'Ijro etish', 'play'),
+            item(Icons.playlist_add_rounded, 'Playlistga qo’shish', 'playlist'),
+            item(
+              Icons.subject_rounded,
+              song.hasLyrics ? 'Lyrics (matn)' : 'Lyrics qo’shish',
+              'lyrics',
             ),
-            PopupMenuItem<String>(
-              value: 'lyrics',
-              child: ListTile(
-                leading: const Icon(Icons.lyrics_rounded),
-                title: Text(
-                  song.hasLyrics ? 'Lyrics (matn)' : 'Lyrics qoʻshish',
-                ),
-              ),
-            ),
-            const PopupMenuItem<String>(
-              value: 'edit',
-              child: ListTile(
-                leading: Icon(Icons.edit_rounded),
-                title: Text('Maʻlumotlarni tahrirlash'),
-              ),
-            ),
-            PopupMenuItem<String>(
-              value: 'favorite',
-              child: ListTile(
-                leading: Icon(
-                  song.isFavorite
-                      ? Icons.favorite_rounded
-                      : Icons.favorite_border_rounded,
-                ),
-                title: Text(
-                  song.isFavorite
-                      ? 'Sevimlilardan olish'
-                      : 'Sevimlilarga qoʻshish',
-                ),
-              ),
+            item(Icons.edit_outlined, 'Ma’lumotlarni tahrirlash', 'edit'),
+            item(
+              song.isFavorite ? Icons.favorite : Icons.favorite_border_rounded,
+              song.isFavorite ? 'Sevimlilardan olish' : 'Sevimlilarga qo’shish',
+              'favorite',
             ),
             if (playlist != null)
-              const PopupMenuItem<String>(
-                value: 'remove',
-                child: ListTile(
-                  leading: Icon(Icons.playlist_remove_rounded),
-                  title: Text('Playlistdan olib tashlash'),
-                ),
+              item(
+                Icons.playlist_remove_rounded,
+                'Playlistdan olib tashlash',
+                'remove',
               ),
-            const PopupMenuItem<String>(
-              value: 'delete',
-              child: ListTile(
-                leading: Icon(Icons.delete_outline_rounded),
-                title: Text('Kutubxonadan oʻchirish'),
-              ),
+            item(Icons.delete_outline_rounded, 'Kutubxonadan o’chirish', 'delete'),
+            const SizedBox(height: 8),
+          ],
+        ),
+      );
+    },
+  );
+
+  if (action == null || !context.mounted) return;
+
+  switch (action) {
+    case 'play':
+      await playerController.playSong(song);
+      break;
+    case 'playlist':
+      await showAddToPlaylistSheet(context, song);
+      break;
+    case 'lyrics':
+      await Navigator.of(context).push(LyricsScreen.route(song));
+      break;
+    case 'edit':
+      await Navigator.of(context).push(SongEditScreen.route(song));
+      break;
+    case 'favorite':
+      await library.toggleFavorite(song);
+      break;
+    case 'remove':
+      if (playlist != null) {
+        await library.removeSongFromPlaylist(playlist, song.id);
+      }
+      break;
+    case 'delete':
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('O’chirilsinmi?'),
+          content: Text(
+            '"${song.title}" kutubxonadan o’chiriladi. '
+            'Telefon xotirasidagi asl fayl saqlanib qoladi.',
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Bekor qilish'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('O’chirish'),
             ),
           ],
-    );
-  }
-
-  Future<bool?> _confirmDelete(BuildContext context) {
-    return showDialog<bool>(
-      context: context,
-      builder:
-          (dialogContext) => AlertDialog(
-            title: const Text('Oʻchirilsinmi?'),
-            content: Text(
-              '"${song.title}" kutubxonadan oʻchiriladi. '
-              'Telefon xotirasidagi asl fayl saqlanib qoladi.',
-            ),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () => Navigator.of(dialogContext).pop(false),
-                child: const Text('Bekor qilish'),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.of(dialogContext).pop(true),
-                child: const Text('Oʻchirish'),
-              ),
-            ],
-          ),
-    );
+        ),
+      );
+      if (confirmed != true) return;
+      await playerController.handleSongRemoved(song.id);
+      await library.deleteSong(song);
+      break;
   }
 }

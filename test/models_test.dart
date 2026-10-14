@@ -40,12 +40,12 @@ void main() {
       expect(restored.hasLyrics, isFalse);
     });
 
-    test('hasLyrics faqat boʻsh boʻlmagan matnda true', () {
+    test('hasLyrics faqat bo’sh bo’lmagan matnda true', () {
       expect(song.hasLyrics, isTrue);
       expect(song.copyWith(lyrics: '   ').hasLyrics, isFalse);
     });
 
-    test('displayArtist boʻsh ijrochini almashtiradi', () {
+    test('displayArtist bo’sh ijrochini almashtiradi', () {
       expect(song.copyWith(artist: '').displayArtist, isNotEmpty);
       expect(song.copyWith(artist: '').displayArtist, isNot('Ijrochi'));
     });

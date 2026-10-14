@@ -90,6 +90,43 @@ jobs:
 
           Commit: ${{ github.sha }}"
 
+      # 3-yo'l: Telegram — APK to'g'ridan-to'g'ri telefonga keladi.
+      # Ishlashi uchun repozitoriya sozlamalarida 2 ta "secret" bo'lishi kerak:
+      #   TELEGRAM_BOT_TOKEN — @BotFather bergan token
+      #   TELEGRAM_CHAT_ID   — kimga yuborilsin (sizning Telegram ID raqamingiz)
+      # Ular qo'yilmagan bo'lsa, bu qadam shunchaki o'tkazib yuboriladi.
+      - name: Telegramga yuborish
+        env:
+          TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          APK: ${{ steps.apk.outputs.name }}
+          SIZE: ${{ steps.apk.outputs.size }}
+        run: |
+          if [ -z "$TOKEN" ] || [ -z "$CHAT_ID" ]; then
+            echo "Telegram sozlanmagan — o'tkazib yuborildi." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          CAPTION="Minor Rep v1.0.${{ github.run_number }} ($SIZE)
+
+          Faylni bosib o'rnating. Eski versiyani avval o'chiring."
+
+          HTTP=$(curl -sS -o /tmp/tg.json -w '%{http_code}' \
+            -F "chat_id=$CHAT_ID" \
+            -F "caption=$CAPTION" \
+            -F "document=@dist/$APK" \
+            "https://api.telegram.org/bot$TOKEN/sendDocument")
+
+          if [ "$HTTP" = "200" ]; then
+            echo "Telegramga yuborildi: $APK" >> "$GITHUB_STEP_SUMMARY"
+          else
+            # Tokenni chiqarib yubormaslik uchun faqat xato tavsifini ko'rsatamiz.
+            echo "Telegramga yuborilmadi (HTTP $HTTP):" >> "$GITHUB_STEP_SUMMARY"
+            python3 -c "import json;print(json.load(open('/tmp/tg.json')).get('description','?'))" \
+              >> "$GITHUB_STEP_SUMMARY" || true
+            echo "Bu buildni to'xtatmaydi — APK Releases bo'limida bor." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       # 2-yo'l: zaxira — Actions sahifasidagi artefakt
       - name: Artefakt sifatida saqlash
         uses: actions/upload-artifact@v4

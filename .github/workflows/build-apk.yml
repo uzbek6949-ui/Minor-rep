@@ -51,17 +51,23 @@ jobs:
         # Dizayn golden rasmlari muhitga bog'liq — CI'da o'tkazib yuboriladi.
         run: flutter test --exclude-tags=preview
 
-      - name: APK qurish
-        run: flutter build apk --release
+      - name: APK qurish (har bir protsessor uchun alohida)
+        # --split-per-abi: bitta katta fayl o'rniga 3 ta kichik APK.
+        # Telefonga faqat bittasi kerak — hajmi ~2,5 barobar kichik.
+        run: flutter build apk --release --split-per-abi
 
-      - name: APK nomini belgilash
+      - name: APK nomlarini belgilash
         id: apk
         run: |
           mkdir -p dist
-          NAME="minor-rep-v1.0.${{ github.run_number }}.apk"
-          cp build/app/outputs/flutter-apk/app-release.apk "dist/$NAME"
-          echo "name=$NAME" >> "$GITHUB_OUTPUT"
-          echo "size=$(du -h "dist/$NAME" | cut -f1)" >> "$GITHUB_OUTPUT"
+          V="v1.0.${{ github.run_number }}"
+          SRC=build/app/outputs/flutter-apk
+          cp "$SRC/app-arm64-v8a-release.apk"   "dist/minor-rep-$V-arm64.apk"
+          cp "$SRC/app-armeabi-v7a-release.apk" "dist/minor-rep-$V-arm32.apk"
+          cp "$SRC/app-x86_64-release.apk"      "dist/minor-rep-$V-x86_64.apk"
+          echo "name=minor-rep-$V-arm64.apk" >> "$GITHUB_OUTPUT"
+          echo "size=$(du -h dist/minor-rep-$V-arm64.apk | cut -f1)" >> "$GITHUB_OUTPUT"
+          ls -lh dist/
 
       # 1-yo'l: Releases bo'limi — telefondan yuklab olish uchun eng qulayi
       - name: Release yaratish
@@ -69,13 +75,17 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           TAG="apk-v1.0.${{ github.run_number }}"
-          gh release create "$TAG" "dist/${{ steps.apk.outputs.name }}" \
+          gh release create "$TAG" dist/*.apk \
             --title "Minor Rep v1.0.${{ github.run_number }}" \
-            --notes "Telefon uchun tayyor APK (${{ steps.apk.outputs.size }}).
+            --notes "### Qaysi faylni olish kerak?
 
-          **O'rnatish:** telefon brauzerida shu sahifani ochib, quyidagi \`.apk\` faylni bosing.
+          **\`${{ steps.apk.outputs.name }}\`** (${{ steps.apk.outputs.size }}) — deyarli barcha zamonaviy telefonlar uchun. Shuni oling.
+
+          Agar o'rnatilmasa (eski yoki juda arzon telefon): \`-arm32\` faylini sinab ko'ring.
+          \`-x86_64\` — faqat emulyator uchun.
+
+          **O'rnatish:** telefon brauzerida shu sahifani ochib, faylni bosing.
           Android \"noma'lum manbadan o'rnatish\"ga ruxsat so'rasa — ruxsat bering.
-
           Yangi versiyani o'rnatishdan oldin eskisini o'chirib tashlang.
 
           Commit: ${{ github.sha }}"

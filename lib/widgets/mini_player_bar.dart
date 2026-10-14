@@ -91,7 +91,10 @@ class MiniPlayerBar extends StatelessWidget {
                     ),
                     const SizedBox(width: 2),
                     _SquareButton(
-                      icon: isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                      icon:
+                          isPlaying
+                              ? Icons.pause_rounded
+                              : Icons.play_arrow_rounded,
                       onPressed: onPlayPause,
                     ),
                   ],

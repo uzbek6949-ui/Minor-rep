@@ -26,7 +26,8 @@ class PlayerScreen extends StatelessWidget {
     final controller = context.watch<PlayerController>();
     final library = context.watch<LibraryController>();
     final current = controller.currentSong;
-    final song = current == null ? null : library.songById(current.id) ?? current;
+    final song =
+        current == null ? null : library.songById(current.id) ?? current;
 
     if (song == null) {
       return Scaffold(
@@ -44,15 +45,19 @@ class PlayerScreen extends StatelessWidget {
         child: Column(
           children: <Widget>[
             _TopBar(
-              label: controller.queueLabel.isEmpty
-                  ? 'Hozir ijroda'
-                  : controller.queueLabel,
+              label:
+                  controller.queueLabel.isEmpty
+                      ? 'Hozir ijroda'
+                      : controller.queueLabel,
               onQueue: () => _showQueue(context, controller),
             ),
             Expanded(
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  final artSize = (constraints.maxWidth - 88).clamp(140.0, 340.0);
+                  final artSize = (constraints.maxWidth - 88).clamp(
+                    140.0,
+                    340.0,
+                  );
                   return SingleChildScrollView(
                     padding: const EdgeInsets.fromLTRB(28, 4, 28, 20),
                     child: Column(
@@ -80,9 +85,10 @@ class PlayerScreen extends StatelessWidget {
                             return WaveformProgress(
                               seed: song.id,
                               position: data.position,
-                              duration: data.duration.inMilliseconds > 0
-                                  ? data.duration
-                                  : song.duration,
+                              duration:
+                                  data.duration.inMilliseconds > 0
+                                      ? data.duration
+                                      : song.duration,
                               onSeek: controller.seek,
                             );
                           },
@@ -97,7 +103,8 @@ class PlayerScreen extends StatelessWidget {
                               isPlaying: state?.playing ?? false,
                               shuffleEnabled: controller.shuffleEnabled,
                               loopMode: controller.loopMode,
-                              isLoading: processing == ProcessingState.loading ||
+                              isLoading:
+                                  processing == ProcessingState.loading ||
                                   processing == ProcessingState.buffering,
                               onShuffle: controller.toggleShuffle,
                               onPrevious: controller.previous,
@@ -112,8 +119,10 @@ class PlayerScreen extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
                             OutlinedButton.icon(
-                              onPressed: () => Navigator.of(context)
-                                  .push(LyricsScreen.route(song)),
+                              onPressed:
+                                  () => Navigator.of(
+                                    context,
+                                  ).push(LyricsScreen.route(song)),
                               icon: const Icon(Icons.subject_rounded, size: 19),
                               label: Text(
                                 song.hasLyrics ? 'Lyrics' : 'Lyrics qo’shish',
@@ -122,8 +131,13 @@ class PlayerScreen extends StatelessWidget {
                             const SizedBox(width: 12),
                             OutlinedButton.icon(
                               onPressed: () => _showQueue(context, controller),
-                              icon: const Icon(Icons.queue_music_rounded, size: 19),
-                              label: Text(songCountLabel(controller.queue.length)),
+                              icon: const Icon(
+                                Icons.queue_music_rounded,
+                                size: 19,
+                              ),
+                              label: Text(
+                                songCountLabel(controller.queue.length),
+                              ),
                             ),
                           ],
                         ),
@@ -231,7 +245,10 @@ class _TopBar extends StatelessWidget {
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w600),
+              style: const TextStyle(
+                fontSize: 15.5,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
           IconButton(

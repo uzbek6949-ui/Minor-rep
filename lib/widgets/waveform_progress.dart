@@ -85,9 +85,10 @@ class _WaveformProgressState extends State<WaveformProgress> {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final shown = Duration(
-      milliseconds: widget.duration.inMilliseconds <= 0
-          ? widget.position.inMilliseconds
-          : (widget.duration.inMilliseconds * _fraction).round(),
+      milliseconds:
+          widget.duration.inMilliseconds <= 0
+              ? widget.position.inMilliseconds
+              : (widget.duration.inMilliseconds * _fraction).round(),
     );
 
     return Column(
@@ -98,9 +99,10 @@ class _WaveformProgressState extends State<WaveformProgress> {
             final width = constraints.maxWidth;
             return GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTapDown: (d) => _handle(d.localPosition.dx, width, finished: true),
-              onHorizontalDragUpdate: (d) =>
-                  _handle(d.localPosition.dx, width, finished: false),
+              onTapDown:
+                  (d) => _handle(d.localPosition.dx, width, finished: true),
+              onHorizontalDragUpdate:
+                  (d) => _handle(d.localPosition.dx, width, finished: false),
               onHorizontalDragEnd: (_) {
                 final drag = _dragFraction;
                 if (drag != null) {
@@ -116,8 +118,8 @@ class _WaveformProgressState extends State<WaveformProgress> {
                     playedColor: scheme.primary,
                     remainingColor:
                         Theme.of(context).brightness == Brightness.light
-                        ? AppColors.waveTrack
-                        : AppColors.darkWaveTrack,
+                            ? AppColors.waveTrack
+                            : AppColors.darkWaveTrack,
                   ),
                 ),
               ),

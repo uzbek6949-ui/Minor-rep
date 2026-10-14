@@ -36,23 +36,28 @@ class AppBottomNav extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         Icon(
-                          i == currentIndex ? items[i].activeIcon : items[i].icon,
+                          i == currentIndex
+                              ? items[i].activeIcon
+                              : items[i].icon,
                           size: 23,
-                          color: i == currentIndex
-                              ? scheme.onSurface
-                              : scheme.onSurfaceVariant,
+                          color:
+                              i == currentIndex
+                                  ? scheme.onSurface
+                                  : scheme.onSurfaceVariant,
                         ),
                         const SizedBox(height: 5),
                         Text(
                           items[i].label,
                           style: TextStyle(
                             fontSize: 11.5,
-                            fontWeight: i == currentIndex
-                                ? FontWeight.w600
-                                : FontWeight.w400,
-                            color: i == currentIndex
-                                ? scheme.onSurface
-                                : scheme.onSurfaceVariant,
+                            fontWeight:
+                                i == currentIndex
+                                    ? FontWeight.w600
+                                    : FontWeight.w400,
+                            color:
+                                i == currentIndex
+                                    ? scheme.onSurface
+                                    : scheme.onSurfaceVariant,
                           ),
                         ),
                       ],

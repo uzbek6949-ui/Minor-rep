@@ -59,9 +59,10 @@ class PlayerControls extends StatelessWidget {
           tooltip: 'Keyingi',
         ),
         _SideButton(
-          icon: loopMode == LoopMode.one
-              ? Icons.repeat_one_rounded
-              : Icons.repeat_rounded,
+          icon:
+              loopMode == LoopMode.one
+                  ? Icons.repeat_one_rounded
+                  : Icons.repeat_rounded,
           active: loopMode != LoopMode.off,
           onPressed: onRepeat,
           tooltip: switch (loopMode) {
@@ -127,19 +128,20 @@ class _PlayButton extends StatelessWidget {
           shape: BoxShape.circle,
           boxShadow: AppShadows.button(Theme.of(context).brightness),
         ),
-        child: isLoading
-            ? Padding(
-                padding: const EdgeInsets.all(26),
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.4,
+        child:
+            isLoading
+                ? Padding(
+                  padding: const EdgeInsets.all(26),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.4,
+                    color: scheme.onPrimary,
+                  ),
+                )
+                : Icon(
+                  isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
                   color: scheme.onPrimary,
+                  size: 36,
                 ),
-              )
-            : Icon(
-                isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                color: scheme.onPrimary,
-                size: 36,
-              ),
       ),
     );
   }

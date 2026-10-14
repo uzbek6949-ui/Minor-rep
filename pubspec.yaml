@@ -18,6 +18,12 @@ dependencies:
   # Fayl tanlash
   file_picker: ^8.0.0+1
 
+  # Boshqa ilovalardan "Ulashish" orqali kelgan fayllarni qabul qilish
+  receive_sharing_intent: ^1.8.1
+
+  # Telegram/Downloads papkalarini o'qish uchun ruxsat so'rash
+  permission_handler: ^11.3.1
+
   # Lokal baza (internet shart emas)
   hive: ^2.2.3
   hive_flutter: ^1.1.0

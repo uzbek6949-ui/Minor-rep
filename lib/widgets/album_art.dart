@@ -36,16 +36,17 @@ class AlbumArt extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(radius),
-        child: hasArt
-            ? Image.file(
-                File(path),
-                width: size,
-                height: size,
-                fit: BoxFit.cover,
-                gaplessPlayback: true,
-                errorBuilder: (context, _, __) => _placeholder(context),
-              )
-            : _placeholder(context),
+        child:
+            hasArt
+                ? Image.file(
+                  File(path),
+                  width: size,
+                  height: size,
+                  fit: BoxFit.cover,
+                  gaplessPlayback: true,
+                  errorBuilder: (context, _, __) => _placeholder(context),
+                )
+                : _placeholder(context),
       ),
     );
   }
@@ -59,9 +60,10 @@ class AlbumArt extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: isLight
-              ? const <Color>[Color(0xFFDFE3EA), Color(0xFFC4CAD4)]
-              : const <Color>[Color(0xFF272B32), Color(0xFF171A1F)],
+          colors:
+              isLight
+                  ? const <Color>[Color(0xFFDFE3EA), Color(0xFFC4CAD4)]
+                  : const <Color>[Color(0xFF272B32), Color(0xFF171A1F)],
         ),
       ),
       child: Icon(

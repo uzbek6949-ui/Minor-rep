@@ -242,6 +242,15 @@ class LibraryController extends ChangeNotifier {
     return target.path;
   }
 
+  /// Shu fayl kutubxonada bormi (nomi va hajmi bo'yicha).
+  bool containsFile(File file) {
+    try {
+      return _isDuplicate(p.basename(file.path), file.lengthSync());
+    } catch (_) {
+      return false;
+    }
+  }
+
   bool _isDuplicate(String fileName, int size) {
     for (final song in _songs) {
       if (p.basename(song.filePath) != fileName) continue;

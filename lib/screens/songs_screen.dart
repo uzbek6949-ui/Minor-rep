@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../state/library_controller.dart';
 import '../state/player_controller.dart';
 import '../utils/formatters.dart';
+import 'sources_screen.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/song_tile.dart';
 
@@ -22,14 +23,15 @@ class _SongsScreenState extends State<SongsScreen> {
     final result = await library.importFromDevice();
     if (!mounted || result.cancelled) return;
 
-    final message = result.added == 0
-        ? 'Yangi qo’shiq qo’shilmadi'
-        : '${result.added} ta qo’shiq qo’shildi'
-            '${result.skipped > 0 ? ' (${result.skipped} ta o’tkazib yuborildi)' : ''}';
+    final message =
+        result.added == 0
+            ? 'Yangi qo’shiq qo’shilmadi'
+            : '${result.added} ta qo’shiq qo’shildi'
+                '${result.skipped > 0 ? ' (${result.skipped} ta o’tkazib yuborildi)' : ''}';
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -56,75 +58,108 @@ class _SongsScreenState extends State<SongsScreen> {
             icon: const Icon(Icons.swap_vert_rounded),
             initialValue: library.sort,
             onSelected: library.setSort,
-            itemBuilder: (context) => const <PopupMenuEntry<SongSort>>[
-              PopupMenuItem<SongSort>(
-                value: SongSort.titleAsc,
-                child: Text('Nomi bo’yicha'),
-              ),
-              PopupMenuItem<SongSort>(
-                value: SongSort.artistAsc,
-                child: Text('Ijrochisi bo’yicha'),
-              ),
-              PopupMenuItem<SongSort>(
-                value: SongSort.recentlyAdded,
-                child: Text('Yangi qo’shilganlar'),
-              ),
-              PopupMenuItem<SongSort>(
-                value: SongSort.durationDesc,
-                child: Text('Davomiyligi bo’yicha'),
-              ),
-            ],
+            itemBuilder:
+                (context) => const <PopupMenuEntry<SongSort>>[
+                  PopupMenuItem<SongSort>(
+                    value: SongSort.titleAsc,
+                    child: Text('Nomi bo’yicha'),
+                  ),
+                  PopupMenuItem<SongSort>(
+                    value: SongSort.artistAsc,
+                    child: Text('Ijrochisi bo’yicha'),
+                  ),
+                  PopupMenuItem<SongSort>(
+                    value: SongSort.recentlyAdded,
+                    child: Text('Yangi qo’shilganlar'),
+                  ),
+                  PopupMenuItem<SongSort>(
+                    value: SongSort.durationDesc,
+                    child: Text('Davomiyligi bo’yicha'),
+                  ),
+                ],
           ),
-          IconButton(
+          PopupMenuButton<String>(
             tooltip: 'Qo’shiq qo’shish',
-            onPressed: library.isImporting ? null : () => _import(library),
             icon: const Icon(Icons.add_rounded),
+            onSelected: (value) {
+              if (value == 'picker') {
+                _import(library);
+              } else {
+                Navigator.of(context).push(SourcesScreen.route());
+              }
+            },
+            itemBuilder:
+                (context) => const <PopupMenuEntry<String>>[
+                  PopupMenuItem<String>(
+                    value: 'sources',
+                    child: ListTile(
+                      leading: Icon(Icons.send_rounded),
+                      title: Text('Telegram va papkalardan'),
+                      subtitle: Text('Yangi qo’shiqlarni o’zi topadi'),
+                    ),
+                  ),
+                  PopupMenuItem<String>(
+                    value: 'picker',
+                    child: ListTile(
+                      leading: Icon(Icons.folder_open_rounded),
+                      title: Text('Fayl tanlash'),
+                      subtitle: Text('Xotiradan qo’lda tanlash'),
+                    ),
+                  ),
+                ],
           ),
           const SizedBox(width: 8),
         ],
       ),
-      body: library.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: <Widget>[
-                if (library.isImporting) _ImportProgress(library: library),
-                if (songs.isNotEmpty)
-                  _ActionsHeader(
-                    count: songs.length,
-                    onPlay: () => playerController.playQueue(
-                      songs,
-                      label: label,
-                      sourceId: 'all',
-                    ),
-                    onShuffle: () async {
-                      await playerController.playQueue(
-                        songs,
-                        label: label,
-                        sourceId: 'all',
-                      );
-                      if (!playerController.shuffleEnabled) {
-                        await playerController.toggleShuffle();
-                      }
-                    },
-                  ),
-                if (library.availableGenres.isNotEmpty && songs.isNotEmpty)
-                  _GenreFilterBar(library: library),
-                Expanded(
-                  child: songs.isEmpty
-                      ? _emptyState(library)
-                      : ListView.builder(
-                          padding: const EdgeInsets.only(top: 4, bottom: 24),
-                          itemCount: songs.length,
-                          itemBuilder: (context, index) => SongTile(
-                            song: songs[index],
-                            queue: songs,
-                            queueLabel: label,
-                            queueSourceId: 'all',
+      body:
+          library.isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : Column(
+                children: <Widget>[
+                  if (library.isImporting) _ImportProgress(library: library),
+                  if (songs.isNotEmpty)
+                    _ActionsHeader(
+                      count: songs.length,
+                      onPlay:
+                          () => playerController.playQueue(
+                            songs,
+                            label: label,
+                            sourceId: 'all',
                           ),
-                        ),
-                ),
-              ],
-            ),
+                      onShuffle: () async {
+                        await playerController.playQueue(
+                          songs,
+                          label: label,
+                          sourceId: 'all',
+                        );
+                        if (!playerController.shuffleEnabled) {
+                          await playerController.toggleShuffle();
+                        }
+                      },
+                    ),
+                  if (library.availableGenres.isNotEmpty && songs.isNotEmpty)
+                    _GenreFilterBar(library: library),
+                  Expanded(
+                    child:
+                        songs.isEmpty
+                            ? _emptyState(library)
+                            : ListView.builder(
+                              padding: const EdgeInsets.only(
+                                top: 4,
+                                bottom: 24,
+                              ),
+                              itemCount: songs.length,
+                              itemBuilder:
+                                  (context, index) => SongTile(
+                                    song: songs[index],
+                                    queue: songs,
+                                    queueLabel: label,
+                                    queueSourceId: 'all',
+                                  ),
+                            ),
+                  ),
+                ],
+              ),
     );
   }
 
@@ -150,12 +185,24 @@ class _SongsScreenState extends State<SongsScreen> {
     return EmptyState(
       icon: Icons.music_note_rounded,
       title: 'Kutubxona bo’sh',
-      message: 'Telefon xotirasidan mp3 yoki boshqa audio fayllarni qo’shing. '
+      message:
+          'Telefon xotirasidan mp3 yoki boshqa audio fayllarni qo’shing. '
           'Internet talab qilinmaydi.',
-      action: FilledButton.icon(
-        onPressed: () => _import(library),
-        icon: const Icon(Icons.folder_open_rounded, size: 20),
-        label: const Text('Fayl tanlash'),
+      action: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          FilledButton.icon(
+            onPressed: () => Navigator.of(context).push(SourcesScreen.route()),
+            icon: const Icon(Icons.send_rounded, size: 20),
+            label: const Text('Telegramdan qidirish'),
+          ),
+          const SizedBox(height: 10),
+          OutlinedButton.icon(
+            onPressed: () => _import(library),
+            icon: const Icon(Icons.folder_open_rounded, size: 20),
+            label: const Text('Fayl tanlash'),
+          ),
+        ],
       ),
     );
   }
@@ -272,8 +319,9 @@ class _GenreFilterBar extends StatelessWidget {
               child: FilterChip(
                 label: Text(genre),
                 selected: library.genreFilter == genre,
-                onSelected: (selected) =>
-                    library.setGenreFilter(selected ? genre : null),
+                onSelected:
+                    (selected) =>
+                        library.setGenreFilter(selected ? genre : null),
                 labelStyle: _labelStyle(context, library.genreFilter == genre),
               ),
             ),

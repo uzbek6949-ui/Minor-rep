@@ -46,29 +46,27 @@ class SongTile extends StatelessWidget {
       index: index,
       isCurrent: isCurrent,
       isPlaying: isCurrent && playerController.isPlaying,
-      onTap: () => playerController.playSong(
-        song,
-        inList: queue ?? <Song>[song],
-        label: queueLabel,
-        sourceId: queueSourceId,
-      ),
-      trailing: showHandle && index != null
-          ? ReorderableDragStartListener(
-              index: index! - 1 < 0 ? 0 : index! - 1,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Icon(
-                  Icons.drag_handle_rounded,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+      onTap:
+          () => playerController.playSong(
+            song,
+            inList: queue ?? <Song>[song],
+            label: queueLabel,
+            sourceId: queueSourceId,
+          ),
+      trailing:
+          showHandle && index != null
+              ? ReorderableDragStartListener(
+                index: index! - 1 < 0 ? 0 : index! - 1,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Icon(
+                    Icons.drag_handle_rounded,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
-              ),
-            )
-          : null,
-      onMenu: () => showSongMenu(
-        context,
-        song: song,
-        playlist: playlist,
-      ),
+              )
+              : null,
+      onMenu: () => showSongMenu(context, song: song, playlist: playlist),
     );
   }
 }
@@ -87,13 +85,13 @@ Future<void> showSongMenu(
     showDragHandle: true,
     builder: (sheetContext) {
       Widget item(IconData icon, String title, String value) => ListTile(
-            leading: Icon(icon),
-            title: Text(
-              title,
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-            ),
-            onTap: () => Navigator.of(sheetContext).pop(value),
-          );
+        leading: Icon(icon),
+        title: Text(
+          title,
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+        ),
+        onTap: () => Navigator.of(sheetContext).pop(value),
+      );
 
       return SafeArea(
         child: Column(
@@ -136,7 +134,11 @@ Future<void> showSongMenu(
                 'Playlistdan olib tashlash',
                 'remove',
               ),
-            item(Icons.delete_outline_rounded, 'Kutubxonadan o’chirish', 'delete'),
+            item(
+              Icons.delete_outline_rounded,
+              'Kutubxonadan o’chirish',
+              'delete',
+            ),
             const SizedBox(height: 8),
           ],
         ),
@@ -170,23 +172,24 @@ Future<void> showSongMenu(
     case 'delete':
       final confirmed = await showDialog<bool>(
         context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: const Text('O’chirilsinmi?'),
-          content: Text(
-            '"${song.title}" kutubxonadan o’chiriladi. '
-            'Telefon xotirasidagi asl fayl saqlanib qoladi.',
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('Bekor qilish'),
+        builder:
+            (dialogContext) => AlertDialog(
+              title: const Text('O’chirilsinmi?'),
+              content: Text(
+                '"${song.title}" kutubxonadan o’chiriladi. '
+                'Telefon xotirasidagi asl fayl saqlanib qoladi.',
+              ),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(false),
+                  child: const Text('Bekor qilish'),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(true),
+                  child: const Text('O’chirish'),
+                ),
+              ],
             ),
-            FilledButton(
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: const Text('O’chirish'),
-            ),
-          ],
-        ),
       );
       if (confirmed != true) return;
       await playerController.handleSongRemoved(song.id);

@@ -1,0 +1,50 @@
+# Telegram boti — tugmalarga javob beradi.
+#
+# Server kerak emas: GitHub har yarim soatda botni qisqa muddatga ishga
+# tushiradi, u yangi xabarlarni o'qib javob beradi va to'xtaydi.
+# Shu sababli tugmani bosgandan keyin javob 30 daqiqagacha kechikishi mumkin.
+# (Repozitoriya ochiq (public) qilinsa, tekshiruvni har 5 daqiqada qilish
+# mumkin — ochiq repolarda GitHub Actions bepul va cheksiz.)
+name: Telegram bot
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  poll:
+    name: Xabarlarni tekshirish
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      build: ${{ steps.bot.outputs.build }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Botni ishga tushirish
+        id: bot
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+            echo "Telegram sozlanmagan — o'tkazib yuborildi."
+            echo "build=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          python3 .github/scripts/telegram_bot.py
+
+  # "Yangi build" tugmasi bosilgan bo'lsa — APK'ni shu yerda yig'amiz.
+  build:
+    needs: poll
+    if: needs.poll.outputs.build == 'true'
+    uses: ./.github/workflows/build-apk.yml
+    permissions:
+      contents: write
+    secrets: inherit

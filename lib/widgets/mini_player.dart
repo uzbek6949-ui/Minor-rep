@@ -24,7 +24,8 @@ class MiniPlayer extends StatelessWidget {
       builder: (context, snapshot) {
         final data = snapshot.data ?? PositionData.zero;
         final total = data.duration.inMilliseconds;
-        final progress = total <= 0 ? 0.0 : data.position.inMilliseconds / total;
+        final progress =
+            total <= 0 ? 0.0 : data.position.inMilliseconds / total;
 
         return MiniPlayerBar(
           song: song,

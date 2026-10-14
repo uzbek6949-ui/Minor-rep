@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../services/share_receiver.dart';
+import '../state/library_controller.dart';
 import '../widgets/app_bottom_nav.dart';
 import '../widgets/mini_player.dart';
 import 'playlists_screen.dart';
@@ -16,6 +19,33 @@ class RootScreen extends StatefulWidget {
 
 class _RootScreenState extends State<RootScreen> {
   int _index = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // Telegram va boshqa ilovalardan "Ulashish" orqali kelgan qo'shiqlar.
+    ShareReceiver.instance.start(_importShared);
+  }
+
+  Future<void> _importShared(List<String> paths) async {
+    final library = context.read<LibraryController>();
+    final result = await library.addFiles(paths);
+    if (!mounted) return;
+
+    final message =
+        result.added > 0
+            ? '${result.added} ta qo\u2019shiq qo\u2019shildi'
+            : 'Bu qo\u2019shiq allaqachon kutubxonada';
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  @override
+  void dispose() {
+    ShareReceiver.instance.dispose();
+    super.dispose();
+  }
 
   static const List<Widget> _pages = <Widget>[
     SongsScreen(),

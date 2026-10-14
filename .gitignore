@@ -1,0 +1,43 @@
+# Dart / Flutter
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+# pubspec.lock ataylab saqlanadi: ilova uchun versiyalar barqaror bo'lishi kerak
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Android
+android/.gradle/
+android/local.properties
+android/key.properties
+*.jks
+*.keystore
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/ephemeral/
+ios/Runner.xcworkspace/xcuserdata/
+**/xcuserdata/
+
+# Generated
+*.g.dart
+coverage/
+
+# Flutter tool artefaktlari
+.flutter-plugins
+.flutter-plugins-dependencies
+.metadata.bak

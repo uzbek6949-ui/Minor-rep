@@ -4,6 +4,7 @@ import 'package:path/path.dart' as p;
 import 'package:permission_handler/permission_handler.dart';
 
 import '../state/library_controller.dart';
+import 'storage_service.dart';
 
 /// Telefon xotirasidagi ma'lum papkalardan audio fayllarni qidiradi.
 ///
@@ -17,8 +18,12 @@ class FolderScanner {
 
   static const String _root = '/storage/emulated/0';
 
-  /// Qidiriladigan manbalar: nomi -> mumkin bo'lgan yo'llar.
-  static const Map<String, List<String>> sources = <String, List<String>>{
+  /// Foydalanuvchi qo'lda qo'shgan papkalar shu kalit ostida saqlanadi.
+  static const String _customKey = 'customFolders';
+
+  /// Doimiy (o'rnatilgan) manbalar: nomi -> mumkin bo'lgan yo'llar.
+  static const Map<String, List<String>>
+  builtInSources = <String, List<String>>{
     'Telegram': <String>[
       '$_root/Telegram/Telegram Audio',
       '$_root/Telegram/Telegram Documents',
@@ -33,6 +38,34 @@ class FolderScanner {
       '$_root/Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Audio',
     ],
   };
+
+  /// Foydalanuvchi qo'shgan papkalar.
+  List<String> get customFolders {
+    final saved = StorageService.instance.setting<List<dynamic>>(_customKey);
+    return (saved ?? const <dynamic>[]).map((e) => e.toString()).toList();
+  }
+
+  Future<void> addCustomFolder(String path) async {
+    final folders = customFolders;
+    if (folders.contains(path)) return;
+    folders.add(path);
+    await StorageService.instance.putSetting(_customKey, folders);
+  }
+
+  Future<void> removeCustomFolder(String path) async {
+    final folders = customFolders..remove(path);
+    await StorageService.instance.putSetting(_customKey, folders);
+  }
+
+  /// O'rnatilgan va qo'lda qo'shilgan manbalar birgalikda.
+  Map<String, List<String>> get sources {
+    final all = <String, List<String>>{...builtInSources};
+    for (final path in customFolders) {
+      final name = path.split('/').where((part) => part.isNotEmpty).last;
+      all['$name (qo\u2019shilgan)'] = <String>[path];
+    }
+    return all;
+  }
 
   /// Fayllarni o'qish uchun ruxsat so'raydi.
   ///

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
@@ -76,6 +77,24 @@ class _SourcesScreenState extends State<SourcesScreen> {
     });
   }
 
+  /// Foydalanuvchi o'zi papka tanlaydi (masalan SD karta yoki boshqa joy).
+  Future<void> _addFolder() async {
+    final granted = await FolderScanner.instance.ensurePermission();
+    if (!mounted || !granted) return;
+
+    final path = await FilePicker.platform.getDirectoryPath(
+      dialogTitle: 'Qo\u2019shiqlar turgan papkani tanlang',
+    );
+    if (path == null || !mounted) return;
+
+    await FolderScanner.instance.addCustomFolder(path);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Papka qo\u2019shildi: ${path.split('/').last}')),
+    );
+    await _scan();
+  }
+
   Future<void> _import() async {
     final library = context.read<LibraryController>();
     final paths = _selected.toList();
@@ -108,6 +127,11 @@ class _SourcesScreenState extends State<SourcesScreen> {
       appBar: AppBar(
         title: const Text('Manbalardan qidirish'),
         actions: <Widget>[
+          IconButton(
+            tooltip: 'Papka qo\u2019shish',
+            onPressed: _scanning ? null : _addFolder,
+            icon: const Icon(Icons.create_new_folder_outlined),
+          ),
           IconButton(
             tooltip: 'Qayta qidirish',
             onPressed: _scanning ? null : _scan,

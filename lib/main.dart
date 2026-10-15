@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:provider/provider.dart';
 
-import 'screens/root_screen.dart';
+import 'screens/splash_screen.dart';
 import 'services/storage_service.dart';
 import 'state/library_controller.dart';
 import 'state/player_controller.dart';
@@ -47,7 +47,7 @@ class MinorRepApp extends StatelessWidget {
         darkTheme: AppTheme.dark(),
         // Telefon sozlamasiga ergashadi: qora rejim yoqilgan bo'lsa — qora.
         themeMode: ThemeMode.system,
-        home: const RootScreen(),
+        home: const SplashScreen(),
       ),
     );
   }

@@ -55,6 +55,9 @@ flutter_launcher_icons:
 flutter:
   uses-material-design: true
 
+  assets:
+    - assets/images/
+
   fonts:
     - family: Poppins
       fonts:

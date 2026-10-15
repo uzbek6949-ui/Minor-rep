@@ -374,6 +374,52 @@ void main() {
       );
     });
   }
+
+  // Ochilish (splash) ekrani — bitta ko'rinish, mavzuga bog'liq emas.
+  testWidgets('ochilish ekrani ko\u2019rinishi', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    await tester.pumpWidget(
+      _frame(
+        dark: true,
+        Scaffold(
+          backgroundColor: Colors.black,
+          body: SizedBox.expand(
+            child: Stack(
+              alignment: Alignment.center,
+              children: <Widget>[
+                Image.asset('assets/images/splash.jpg', fit: BoxFit.contain),
+                Positioned(
+                  bottom: 42,
+                  child: SizedBox(
+                    width: 110,
+                    child: LinearProgressIndicator(
+                      minHeight: 2,
+                      backgroundColor: Colors.white.withValues(alpha: 0.20),
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    // Rasm haqiqatan yuklanishi uchun (test muhitida avtomatik bo'lmaydi).
+    await tester.runAsync(() async {
+      for (final element in find.byType(Image).evaluate()) {
+        await precacheImage((element.widget as Image).image, element);
+      }
+    });
+    await tester.pump(const Duration(milliseconds: 300));
+
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('preview/splash.png'),
+    );
+  });
 }
 
 void _noop(int value) {}

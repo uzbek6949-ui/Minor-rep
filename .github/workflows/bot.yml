@@ -8,8 +8,10 @@
 name: Telegram bot
 
 on:
-  schedule:
-    - cron: '*/30 * * * *'
+  # Jadval o'chirilgan: bot endi Cloudflare Worker'da ishlaydi va
+  # Telegram xabarlarni to'g'ridan-to'g'ri o'sha yerga yuboradi
+  # (cloudflare/README.md). Webhook ulangan paytda getUpdates ishlamaydi.
+  # Zaxira sifatida qo'lda ishga tushirish mumkin.
   workflow_dispatch:
 
 permissions:

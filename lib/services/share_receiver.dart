@@ -5,8 +5,8 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import '../state/library_controller.dart';
 
-/// Boshqa ilovalardan ("Ulashish" tugmasi orqali) kelgan audio fayllarni
-/// qabul qiladi — masalan Telegramdagi qo'shiqni Minor Rep'ga yuborish.
+/// Boshqa ilovalardan ("Ulashish" tugmasi orqali) kelgan narsalarni qabul
+/// qiladi: audio fayllar va matn (qo'shiq so'zlari).
 class ShareReceiver {
   ShareReceiver._();
 
@@ -15,44 +15,65 @@ class ShareReceiver {
   StreamSubscription<List<SharedMediaFile>>? _subscription;
   bool _started = false;
 
-  /// [onFiles] — qabul qilingan fayl yo'llari (audio bo'lmaganlari olib tashlangan).
-  void start(Future<void> Function(List<String> paths) onFiles) {
+  /// [onFiles] — kelgan audio fayllar yo'li.
+  /// [onText] — kelgan matn (masalan Telegramdan nusxalangan qo'shiq so'zlari).
+  void start(
+    Future<void> Function(List<String> paths) onFiles, {
+    Future<void> Function(String text)? onText,
+  }) {
     if (_started) return;
     _started = true;
 
-    // Ilova ochiq turganda kelgan fayllar.
+    // Ilova ochiq turganda kelgan narsalar.
     _subscription = ReceiveSharingIntent.instance.getMediaStream().listen(
-      (files) => _handle(files, onFiles),
+      (items) => _handle(items, onFiles, onText),
       onError: (Object _) {},
     );
 
     // Ilova "Ulashish" orqali yopiq holatdan ochilgan bo'lsa.
     ReceiveSharingIntent.instance
         .getInitialMedia()
-        .then((files) async {
-          await _handle(files, onFiles);
-          // Bir marta ishlatilgandan keyin tozalaymiz, aks holda qayta ochilganda
-          // o'sha fayl yana qo'shilishga urinadi.
+        .then((items) async {
+          await _handle(items, onFiles, onText);
+          // Bir marta ishlatilgandan keyin tozalaymiz, aks holda ilova qayta
+          // ochilganda o'sha narsa yana qo'shilishga urinadi.
           ReceiveSharingIntent.instance.reset();
         })
         .catchError((Object _) {});
   }
 
   Future<void> _handle(
-    List<SharedMediaFile> files,
+    List<SharedMediaFile> items,
     Future<void> Function(List<String> paths) onFiles,
+    Future<void> Function(String text)? onText,
   ) async {
-    final paths =
-        files
-            .map((file) => file.path)
-            .where((path) => path.trim().isNotEmpty)
-            .where((path) {
-              final ext = p.extension(path).replaceFirst('.', '').toLowerCase();
-              return LibraryController.supportedExtensions.contains(ext);
-            })
-            .toList();
-    if (paths.isEmpty) return;
-    await onFiles(paths);
+    final paths = <String>[];
+    final texts = <String>[];
+
+    for (final item in items) {
+      final isText =
+          item.type == SharedMediaType.text || item.type == SharedMediaType.url;
+
+      if (isText) {
+        // Matn `message` yoki `path` maydonida kelishi mumkin.
+        final value =
+            (item.message?.trim().isNotEmpty ?? false)
+                ? item.message!
+                : item.path;
+        if (value.trim().isNotEmpty) texts.add(value);
+        continue;
+      }
+
+      if (item.path.trim().isEmpty) continue;
+      final extension =
+          p.extension(item.path).replaceFirst('.', '').toLowerCase();
+      if (LibraryController.supportedExtensions.contains(extension)) {
+        paths.add(item.path);
+      }
+    }
+
+    if (paths.isNotEmpty) await onFiles(paths);
+    if (texts.isNotEmpty && onText != null) await onText(texts.join('\n\n'));
   }
 
   void dispose() {

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../services/share_receiver.dart';
 import '../state/library_controller.dart';
 import '../widgets/app_bottom_nav.dart';
+import 'lyrics_import_screen.dart';
 import '../widgets/mini_player.dart';
 import 'playlists_screen.dart';
 import 'search_screen.dart';
@@ -24,7 +25,7 @@ class _RootScreenState extends State<RootScreen> {
   void initState() {
     super.initState();
     // Telegram va boshqa ilovalardan "Ulashish" orqali kelgan qo'shiqlar.
-    ShareReceiver.instance.start(_importShared);
+    ShareReceiver.instance.start(_importShared, onText: _importSharedText);
   }
 
   Future<void> _importShared(List<String> paths) async {
@@ -39,6 +40,13 @@ class _RootScreenState extends State<RootScreen> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  /// Boshqa ilovadan kelgan matn — qaysi qo'shiqqa tegishliligini
+  /// foydalanuvchi tasdiqlaydi (ilova o'zi taxmin qilib qo'yadi).
+  Future<void> _importSharedText(String text) async {
+    if (!mounted) return;
+    await Navigator.of(context).push(LyricsImportScreen.route(text));
   }
 
   @override

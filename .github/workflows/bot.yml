@@ -13,6 +13,15 @@ on:
   # (cloudflare/README.md). Webhook ulangan paytda getUpdates ishlamaydi.
   # Zaxira sifatida qo'lda ishga tushirish mumkin.
   workflow_dispatch:
+    inputs:
+      action:
+        description: "Nima qilinsin"
+        type: choice
+        default: poll
+        options:
+          - poll # yangi xabarlarni tekshirish
+          - apk # oxirgi APK'ni darhol yuborish
+          - status # oxirgi build holati
 
 permissions:
   contents: read
@@ -34,6 +43,7 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           GH_TOKEN: ${{ github.token }}
+          FORCE_ACTION: ${{ inputs.action }}
         run: |
           if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
             echo "Telegram sozlanmagan — o'tkazib yuborildi."

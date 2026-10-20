@@ -140,6 +140,16 @@ def send_status() -> None:
 
 
 def main() -> None:
+    # Qo'lda ishga tushirilganda: xabarlarni kutmasdan darhol APK yuborish.
+    forced = os.environ.get("FORCE_ACTION", "").strip().lower()
+    if forced == "apk":
+        send_latest_apk()
+        print("APK yuborildi (qo'lda buyruq).")
+        return
+    if forced == "status":
+        send_status()
+        return
+
     updates = call("getUpdates", {"timeout": 0, "limit": 50})
     results = updates.get("result", []) if updates.get("ok") else []
     if not results:

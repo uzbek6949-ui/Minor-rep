@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
 
+import '../services/folder_scanner.dart';
 import '../state/library_controller.dart';
 import '../state/player_controller.dart';
 import '../utils/formatters.dart';
@@ -39,6 +41,7 @@ class _SongsScreenState extends State<SongsScreen> {
     final library = context.watch<LibraryController>();
     final playerController = context.read<PlayerController>();
     final songs = _onlyFavorites ? library.favorites : library.songs;
+    final mainFolder = FolderScanner.instance.mainFolder;
     final label = _onlyFavorites ? 'Sevimlilar' : 'Barcha qo’shiqlar';
 
     return Scaffold(
@@ -82,15 +85,30 @@ class _SongsScreenState extends State<SongsScreen> {
             tooltip: 'Qo’shiq qo’shish',
             icon: const Icon(Icons.add_rounded),
             onSelected: (value) {
-              if (value == 'picker') {
-                _import(library);
-              } else {
-                Navigator.of(context).push(SourcesScreen.route());
+              switch (value) {
+                case 'picker':
+                  _import(library);
+                case 'main':
+                  Navigator.of(
+                    context,
+                  ).push(SourcesScreen.route(onlyFolder: mainFolder));
+                default:
+                  Navigator.of(context).push(SourcesScreen.route());
               }
             },
             itemBuilder:
-                (context) => const <PopupMenuEntry<String>>[
-                  PopupMenuItem<String>(
+                (context) => <PopupMenuEntry<String>>[
+                  // Foydalanuvchining asosiy papkasi (masalan "Minor") — bir bosishda.
+                  if (mainFolder != null)
+                    PopupMenuItem<String>(
+                      value: 'main',
+                      child: ListTile(
+                        leading: const Icon(Icons.folder_special_rounded),
+                        title: Text(p.basename(mainFolder)),
+                        subtitle: const Text('Asosiy papka'),
+                      ),
+                    ),
+                  const PopupMenuItem<String>(
                     value: 'sources',
                     child: ListTile(
                       leading: Icon(Icons.send_rounded),
@@ -98,7 +116,7 @@ class _SongsScreenState extends State<SongsScreen> {
                       subtitle: Text('Yangi qo’shiqlarni o’zi topadi'),
                     ),
                   ),
-                  PopupMenuItem<String>(
+                  const PopupMenuItem<String>(
                     value: 'picker',
                     child: ListTile(
                       leading: Icon(Icons.folder_open_rounded),

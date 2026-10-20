@@ -21,6 +21,12 @@ class FolderScanner {
   /// Foydalanuvchi qo'lda qo'shgan papkalar shu kalit ostida saqlanadi.
   static const String _customKey = 'customFolders';
 
+  /// "Asosiy papka" — bosh ekrandagi tugma to'g'ridan-to'g'ri shuni ochadi.
+  static const String _mainKey = 'mainFolder';
+
+  /// Avtomatik qidirishda shu nomlarga o'xshash papkalar topiladi.
+  static const List<String> _autoNames = <String>['minor', 'minor rep'];
+
   /// Doimiy (o'rnatilgan) manbalar: nomi -> mumkin bo'lgan yo'llar.
   static const Map<String, List<String>>
   builtInSources = <String, List<String>>{
@@ -55,6 +61,61 @@ class FolderScanner {
   Future<void> removeCustomFolder(String path) async {
     final folders = customFolders..remove(path);
     await StorageService.instance.putSetting(_customKey, folders);
+    if (mainFolder == path) await setMainFolder(null);
+  }
+
+  /// Bosh ekrandan bir bosishda ochiladigan papka (masalan "Minor").
+  String? get mainFolder {
+    final saved = StorageService.instance.setting<String>(_mainKey);
+    return (saved == null || saved.trim().isEmpty) ? null : saved;
+  }
+
+  Future<void> setMainFolder(String? path) =>
+      StorageService.instance.putSetting(_mainKey, path ?? '');
+
+  /// Telefon xotirasidan nomi "Minor" ga o'xshash papkalarni qidiradi.
+  ///
+  /// Asosiy papkalar va ularning ichidagi bir qavat tekshiriladi — chuqurroq
+  /// kirish sekin bo'lgani uchun qolgani qo'lda qo'shiladi.
+  Future<List<String>> autoDetectFolders() async {
+    final found = <String>[];
+    final roots = <String>[
+      _root,
+      '$_root/Music',
+      '$_root/Download',
+      '$_root/Documents',
+    ];
+
+    for (final root in roots) {
+      final dir = Directory(root);
+      if (!await dir.exists()) continue;
+      try {
+        await for (final entity in dir.list(followLinks: false)) {
+          if (entity is! Directory) continue;
+          final name = p.basename(entity.path).toLowerCase();
+          if (_autoNames.any(
+            (needle) => name == needle || name.startsWith(needle),
+          )) {
+            found.add(entity.path);
+          }
+        }
+      } on FileSystemException {
+        // Ruxsat yo'q — o'tkazib yuboramiz.
+      }
+    }
+    return found;
+  }
+
+  /// Bitta papkani (va ichidagi 2 qavatni) tekshiradi.
+  Future<List<File>> scanFolder(String path, {int maxDepth = 2}) async {
+    final found = <File>[];
+    final dir = Directory(path);
+    if (!await dir.exists()) return found;
+    await _collect(dir, found, <String>{}, maxDepth);
+    found.sort(
+      (a, b) => b.statSync().modified.compareTo(a.statSync().modified),
+    );
+    return found;
   }
 
   /// O'rnatilgan va qo'lda qo'shilgan manbalar birgalikda.

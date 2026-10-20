@@ -19,6 +19,9 @@ import sys
 import urllib.parse
 import urllib.request
 
+# Yuborishda xatolik bo'lsa shu bayroq ko'tariladi — qadam qizil bo'lsin.
+_failed = False
+
 TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
 OWNER = str(os.environ["TELEGRAM_CHAT_ID"]).strip()
 REPO = os.environ.get("GITHUB_REPOSITORY", "")
@@ -51,7 +54,15 @@ def call(method: str, params: dict) -> dict:
         with urllib.request.urlopen(request, timeout=60) as response:
             return json.load(response)
     except Exception as error:  # tarmoq uzilsa ham bot yiqilmasin
-        print(f"{method} xatosi: {error}", file=sys.stderr)
+        global _failed
+        _failed = True
+        hint = ""
+        if "401" in str(error):
+            hint = (
+                " \u2014 token noto'g'ri yoki bekor qilingan. "
+                "GitHub Secrets'dagi TELEGRAM_BOT_TOKEN ni yangilang."
+            )
+        print(f"XATO: {method} \u2014 {error}{hint}", file=sys.stderr)
         return {"ok": False}
 
 
@@ -108,7 +119,12 @@ def send_latest_apk() -> None:
         ]
     )
     if code != 0:
+        global _failed
+        _failed = True
+        print(f"XATO: fayl Telegramga yuborilmadi \u2014 {err[:300]}", file=sys.stderr)
         send(f"Fayl yuborilmadi: `{err[:200]}`")
+    else:
+        print(f"Telegramga yuborildi: {files[0]} ({size_mb:.0f} MB)")
 
 
 def send_status() -> None:
@@ -144,7 +160,8 @@ def main() -> None:
     forced = os.environ.get("FORCE_ACTION", "").strip().lower()
     if forced == "apk":
         send_latest_apk()
-        print("APK yuborildi (qo'lda buyruq).")
+        if _failed:
+            sys.exit("APK yuborilmadi — yuqoridagi xatoga qarang.")
         return
     if forced == "status":
         send_status()

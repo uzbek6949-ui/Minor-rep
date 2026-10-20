@@ -119,8 +119,11 @@ jobs:
             "https://api.telegram.org/bot$TOKEN/sendDocument")
 
           if [ "$HTTP" = "200" ]; then
+            echo "Telegramga yuborildi: $APK"
             echo "Telegramga yuborildi: $APK" >> "$GITHUB_STEP_SUMMARY"
           else
+            echo "XATO: Telegram javobi HTTP $HTTP (401 bo'lsa — token eskirgan)"
+            cat /tmp/tg.json || true
             # Tokenni chiqarib yubormaslik uchun faqat xato tavsifini ko'rsatamiz.
             echo "Telegramga yuborilmadi (HTTP $HTTP):" >> "$GITHUB_STEP_SUMMARY"
             python3 -c "import json;print(json.load(open('/tmp/tg.json')).get('description','?'))" \
